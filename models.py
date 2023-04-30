@@ -366,61 +366,66 @@ PhysNet ↓
 
 class PhysNet(keras.Model):
 
-    def __init__(self):
+    def __init__(self, norm='batch'):
+        self.norm = norm
+        if norm == 'batch':
+            norm = layers.BatchNormalization
+        if norm == 'layer':
+            norm = lambda :layers.LayerNormalization(axis=(1,))
         super().__init__()
         self.ConvBlock1 = keras.Sequential([
             layers.Conv3D(16, kernel_size=(1, 5, 5), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.ConvBlock2 = keras.Sequential([
             layers.Conv3D(32, kernel_size=(3, 3, 3), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.ConvBlock3 = keras.Sequential([
             layers.Conv3D(64, kernel_size=(3, 3, 3), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.ConvBlock4 = keras.Sequential([
             layers.Conv3D(64, kernel_size=(3, 3, 3), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.ConvBlock5 = keras.Sequential([
             layers.Conv3D(64, kernel_size=(3, 3, 3), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.ConvBlock6 = keras.Sequential([
             layers.Conv3D(64, kernel_size=(3, 3, 3), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.ConvBlock7 = keras.Sequential([
             layers.Conv3D(64, kernel_size=(3, 3, 3), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.ConvBlock8 = keras.Sequential([
             layers.Conv3D(64, kernel_size=(3, 3, 3), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.ConvBlock9 = keras.Sequential([
             layers.Conv3D(64, kernel_size=(3, 3, 3), strides=1, padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('relu')
         ])
         self.upsample = keras.Sequential([
             layers.Conv3DTranspose(64, kernel_size=(4, 1, 1), strides=(2, 1, 1), padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('elu')
         ])
         self.upsample2 = keras.Sequential([
             layers.Conv3DTranspose(64, kernel_size=(4, 1, 1), strides=(2, 1, 1), padding='same'),
-            layers.BatchNormalization(),
+            norm(),
             layers.Activation('elu')
         ])
         self.convBlock10 = layers.Conv3D(1, kernel_size=(1, 1, 1), strides=1)
@@ -430,6 +435,10 @@ class PhysNet(keras.Model):
         self.flatten = layers.Reshape((-1,))
 
     def call(self, x, training=True):
+        if self.norm == 'batch':
+            training=True
+        else:
+            training=False
         x = self.ConvBlock1(x, training=training)
         x = self.MaxpoolSpa(x)
         x = self.ConvBlock2(x, training=training)
