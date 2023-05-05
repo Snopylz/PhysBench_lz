@@ -17,8 +17,17 @@ import threading
 from scipy.signal import welch, butter, lfilter
 
 def get_hr(y, sr=30, min=30, max=180):
-    p, q = welch(y, sr, nfft=5e5/sr, nperseg=np.min((len(y)-1, 256)))
+    p, q = welch(y, sr, nfft=1e5/sr, nperseg=np.min((len(y)-1, 256)))
     return p[(p>min/60)&(p<max/60)][np.argmax(q[(p>min/60)&(p<max/60)])]*60
+
+def get_hrv(y, sr=30):
+    # Please use videos longer than 5 minutes, such as the OBF dataset.
+    p, q = welch(y, sr, nfft=1e6/sr, nperseg=np.min((len(y)-1, 512)))
+    RF = p[(p>.04)&(p<.4)][np.argmax(q[(p>.04)&(p<.4)])]
+    TP = q[(p>.04)&(p<.4)].sum()
+    HF = q[(p>.15)&(p<.4)].sum()/TP
+    LF = q[(p>.04)&(p<.15)].sum()/TP
+    return RF, LF, HF, LF/HF
 
 def bandpass_filter(data, lowcut=0.6, highcut=2.5, fs=30, order=2):
     b, a = butter(order, [lowcut, highcut], fs=fs, btype='band')
@@ -101,7 +110,7 @@ loader_ubfc_rppg2 = LoaderUBFCrPPG2(dataset_ubfc_rppg2)
 class LoaderPURE(Loader):
 
     def __call__(self, vid):
-        with open(f'{self.base}/{vid}', 'r') as f:
+        with open(f'{self.base}{vid}', 'r') as f:
             a = json.load(f)
         x, y = [i['Timestamp']/10**9 for i in a['/FullPackage']], [i['Value']['waveform'] for i in a['/FullPackage']]
         f_i = UnivariateSpline(x, y, s=0)
@@ -143,7 +152,24 @@ class LoaderCCNU(Loader):
     
 loader_ccnu = LoaderCCNU(dataset_ccnu)
 
-def generate_vid_labels(vid, detect_per_n=5):
+class LoaderSCAMPS(Loader):
+
+    def __call__(self, vid):
+        path = f"{self.base}{vid}"
+        with h5py.File(path, 'r') as f:
+            bvp = f['d_ppg'][:].reshape(-1)
+            ts = np.arange(0, bvp.shape[0]/30, 1/30)
+        class _1:
+            def __iter__(self):
+                with h5py.File(path, 'r') as f:
+                    frames = (f['RawFrames'][:].transpose(3, 2, 1, 0)*255).astype(np.uint8)
+                return (_ for _ in frames)
+            #迭代器有状态，因此有内存泄漏的隐患，要把frames放在__iter__中，令其返回一个生成器，用完即释放
+        return _1(), bvp, ts
+
+loader_scamps = LoaderSCAMPS(dataset_scamps)
+
+def generate_vid_labels(vid, detect_per_n=5, bfill=True):
     boxes = []
     all_landmarks = []
     n = 0
@@ -189,6 +215,13 @@ def generate_vid_labels(vid, detect_per_n=5):
                 boxes.append(np.full((2, 2), -1))
             else:
                 boxes.append(box_)
+    if bfill:
+        t = np.full((2, 2), -1)
+        for i in range(len(boxes)):
+            if (boxes[-i-1]==-1).any():
+                boxes[-i-1] = t
+            else:
+                t = boxes[-i-1]
     return boxes, all_landmarks
 
 def load_dataset(files, loader:Loader, threads=8):
@@ -248,7 +281,7 @@ def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), thre
             _.create_dataset('bvp', data=np.array(bvp), compression=compression)
             _.create_dataset('timestamp', data=np.array(ts), compression=compression)
         with ThreadPoolExecutor(threads) as p:
-            for i in tqdm.tqdm(p.map(dump, enumerate(load_dataset(files, loader))), total=len(files)):
+            for i in p.map(dump, enumerate(tqdm.tqdm(load_dataset(files, loader), total=len(files)))):
                 pass
         with h5py.File(target, 'r+') as f:
             files = list(files)
@@ -299,6 +332,8 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
             if not selector_(i.attrs):
                 continue
             ts = i['timestamp'][:]
+            if ts.shape[0]==0:
+                continue
             sr = 1/(ts[1:]-ts[:-1]).mean()
             hr = get_hr(i['bvp'], sr)
             bvp_normalized = norm_bvp(i['bvp'])

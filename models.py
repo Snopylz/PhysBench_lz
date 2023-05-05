@@ -434,7 +434,7 @@ class PhysNet(keras.Model):
         self.poolspa = layers.AvgPool3D((1, 2, 2))
         self.flatten = layers.Reshape((-1,))
 
-    def call(self, x, training=True):
+    def call(self, x):
         if self.norm == 'batch':
             training=True
         else:

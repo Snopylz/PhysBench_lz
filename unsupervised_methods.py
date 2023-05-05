@@ -1,6 +1,6 @@
 import numpy as np
 import scipy, math
-from utils import detrend
+from models import detrend
 
 def CHROM(RGB):
     Xcomp, Ycomp = (np.array([[3 ,  -2 , 0],

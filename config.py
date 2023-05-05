@@ -7,6 +7,7 @@ if not os.path.exists(tmp):
 dataset_ccnu = "E:"
 dataset_pure = "Z:/PURE"
 dataset_ubfc_rppg2 = "C:/UBFC-rPPG/DATASET_2"
+dataset_scamps = 'C:/scamps_videos'
 
 # Please first generate these data through dataset_process.ipynb.
 test_set_CCNU = "Z:/rppg/ccnu_dataset_test.h5"

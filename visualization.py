@@ -26,13 +26,13 @@ def get_plot(n, r=2.5):
         pre = bandpass_filter(pre, lowcut=data['band'][0], highcut=data['band'][1], fs=fps)
 
     ax2.cla()
-    p, q = welch(label, fps, nfft=5e5/fps, nperseg=len(label)-1)
+    p, q = welch(label, fps, nfft=1e5/fps, nperseg=len(label)-1)
     x, y = p[(p>0)&(p<3)], q[(p>0)&(p<3)]
     hr, h = x[np.argmax(y)]*60, np.max(y)
     ax2.plot(x*60, y, label='GT', color='blue')
     ax2.plot([hr], [h], 'o', color='blue')
     ax2.annotate(str(round(hr, 2)), xytext=(hr, h), xy=(hr, h), color='blue')
-    p, q = welch(pre, fps, nfft=5e5/fps, nperseg=len(label)-1)
+    p, q = welch(pre, fps, nfft=1e5/fps, nperseg=len(label)-1)
     x, y = p[(p>0)&(p<3)], q[(p>0)&(p<3)]
     hr, h = x[np.argmax(y)]*60, np.max(y)
     ax2.plot(x*60, y, label='rPPG', color='red')
