@@ -89,7 +89,7 @@ Please run `visualization.py` to open the visualization webpage. Before visualiz
 
 ## Request RLAP dataset  
 
-If you wish to obtain the RLAP dataset, please send an email to kegangwang@mails.ccnu.edu.cn and cc yantaowei@mail.ccnu.edu.cn, with the Data Usage Agreement attached.
+If you wish to obtain the RLAP dataset, please send an email to kegangwang@mails.ccnu.edu.cn and cc yantaowei@ccnu.edu.cn, with the Data Usage Agreement attached.
 
 ## Citation  
 
