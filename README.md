@@ -1,5 +1,5 @@
 # PhysBench 
-Please use the `Tutorial/Noob Heart.ipynb` to learn about this framework.
+Please use the `[Tutorial/Noob Heart.ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart.ipynb)` to learn about this framework.
 
 ## Models  
 
