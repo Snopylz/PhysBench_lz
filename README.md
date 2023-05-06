@@ -83,7 +83,7 @@ RMSE: 0.88
 Pearson Coef.: 0.999  
 
 ## Visualization  
-Please run visualization.py to open the visualization webpage. Before visualizing, make sure all result files are saved in the results folder. When the framework generates result files, it links to the dataset files, so the visualization webpage can display face images synchronously. Once the link is invalid, such as when dataset files are moved, faces cannot be displayed on the webpage.  
+Please run `visualization.py` to open the visualization webpage. Before visualizing, make sure all result files are saved in the results folder. When the framework generates result files, it links to the dataset files, so the visualization webpage can display face images synchronously. Once the link is invalid, such as when dataset files are moved, faces cannot be displayed on the webpage.  
 
 ![image](https://github.com/KegangWangCCNU/PICS/blob/main/PhysBench.gif)  
 
