@@ -87,4 +87,8 @@ Please run visualization.py to open the visualization webpage. Before visualizin
 
 ![image](https://github.com/KegangWangCCNU/PICS/blob/main/PhysBench.gif)  
 
+## Request RLAP dataset  
+
+If you wish to obtain the RLAP dataset, please send an email to kegangwang@mails.ccnu.edu.cn and cc yantaowei@mail.ccnu.edu.cn, with the Data Usage Agreement attached.
+
 I am looking for a CS Ph.D. position, my research field is computer vision and physiological remote sensing, and I will graduate with a master's degree in June 2024. If anyone is interested, please send an email to kegangwang@mails.ccnu.edu.cn. 
