@@ -15,7 +15,7 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |1D CNN|8x8|196K|261K|1D CNN|  
 |NoobHeart|8x8|361|5790|3D CNN|  
 ## Datasets  
-Adding a dataset is simple, just write a loader and include a file directory (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, PURE, and SCAMPS. You can use our recording program to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
+Adding a dataset is simple, just write a loader and include a file directory (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, PURE, and SCAMPS. You can use our recording program `PhysRecorder/PhysRecorder.exe` to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
 |Dataset|Participants|Frames|Synchronicity|  
 |:-:|:-:|:-:|:-:|  
 |RLAP|58|3.53M|Good|   
@@ -81,4 +81,10 @@ Pearson Coef.: 0.997
 MAE: 0.53  
 RMSE: 0.88  
 Pearson Coef.: 0.999  
-![](http://kegang.wang/PhysBench.gif)
+
+## Visualization  
+Please run visualization.py to open the visualization webpage. Before visualizing, make sure all result files are saved in the results folder. When the framework generates result files, it links to the dataset files, so the visualization webpage can display face images synchronously. Once the link is invalid, such as when dataset files are moved, faces cannot be displayed on the webpage.  
+
+![image](https://github.com/KegangWangCCNU/PICS/blob/main/PhysBench.gif)  
+
+I am looking for a CS Ph.D. position, my research field is computer vision and physiological remote sensing, and I will graduate with a master's degree in June 2024. If anyone is interested, please send an email to kegangwang@mails.ccnu.edu.cn. 
