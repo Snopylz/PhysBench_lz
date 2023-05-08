@@ -93,7 +93,7 @@ If you wish to obtain the RLAP dataset, please send an email to kegangwang@mails
 
 ## Citation  
 
-If you use PhysBench framework, PhysRecorder data collection tool, or the models included in this framework, please cite the following paper:
+If you use PhysBench framework, PhysRecorder data collection tool, or the models included in this framework, please cite the following [paper](https://raw.githubusercontent.com/KegangWangCCNU/PICS/main/PhysBench.pdf):
 ```
 ```
 I am looking for a CS Ph.D. position, my research field is computer vision and remote physiological sensing, and I will graduate with a master's degree in June 2024. If anyone is interested, please send an email to kegangwang@mails.ccnu.edu.cn. 
