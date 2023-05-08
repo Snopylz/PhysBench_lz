@@ -372,6 +372,8 @@ class PhysNet(keras.Model):
             norm = layers.BatchNormalization
         if norm == 'layer':
             norm = lambda :layers.LayerNormalization(axis=(1,))
+        if norm == 'layer_frozen':
+            norm = lambda :layers.LayerNormalization(axis=(1,), trainable=False)
         super().__init__()
         self.ConvBlock1 = keras.Sequential([
             layers.Conv3D(16, kernel_size=(1, 5, 5), strides=1, padding='same'),
