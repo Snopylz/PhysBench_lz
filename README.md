@@ -98,5 +98,13 @@ If you wish to obtain the RLAP dataset, please send an email to kegangwang@mails
 
 If you use PhysBench framework, PhysRecorder data collection tool, or the models included in this framework, please cite the following <a href="https://github.com/KegangWangCCNU/PICS/raw/main/PhysBench.pdf" target="_blank">paper</a>
 ```
+@misc{wang2023physbench,
+      title={PhysBench: A Benchmark Framework for Remote Physiological Sensing with New Dataset and Baseline}, 
+      author={Kegang Wang and Yantao Wei and Mingwen Tong and Jie Gao and Yi Tian and YuJian Ma and ZhongJin Zhao},
+      year={2023},
+      eprint={2305.04161},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
 ```
 I am looking for a CS Ph.D. position, my research field is computer vision and remote physiological sensing, and I will graduate with a master's degree in June 2024. If anyone is interested, please send an email to kegangwang@mails.ccnu.edu.cn. 
