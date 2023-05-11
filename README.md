@@ -39,34 +39,232 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 |NoobHeart|1.79|5.85|0.832|  
 
 ### Intra-dataset testing on RLAP-rPPG  
-|Model|MAE|RMSE|Pearson Coef.|   
-|:-:|:-:|:-:|:-:|  
-|DeepPhys|1.76|4.87|0.877|  
-|TS-CAN|1.23|3.82|0.922|  
-|PhysNet|1.04|3.80|0.923|  
-|PhysFormer|0.78|2.83|0.957|  
-|1D CNN|0.81|2.97|0.953|  
-|NoobHeart|1.57|4.71|0.883|  
+<form action="" method="post" name="form1" class="form" id="form1">
+<table width="100%" cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+<th rowspan="2" colspan="1">Model</td>
+<th colspan="3">HR</td>
+<th colspan="3">HRV-SDNN</td>
+</tr>
+<tr>
+<th rowspan="1" colspan="1">MAE</td>
+<th rowspan="1" colspan="1">RMSE</td>
+<th rowspan="1" colspan="1">Pearson Coef.</td>
+<th rowspan="1" colspan="1">MAE</td>
+<th rowspan="1" colspan="1">RMSE</th>
+<th rowspan="1" colspan="1">Pearson Coef.</th>
+</tr>
+</thead>
+<tbody align="center">
+<tr>
+<td rowspan="1" colspan="1">DeepPhys</td>
+<td rowspan="1" colspan="1">1.76</td>
+<td rowspan="1" colspan="1">4.87</td>
+<td rowspan="1" colspan="1">0.877</td>
+<td rowspan="1" colspan="1">57.6</td>
+<td rowspan="1" colspan="1">64.2</td>
+<td rowspan="1" colspan="1">0.338</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">TS-CAN</td>
+<td rowspan="1" colspan="1">1.23</td>
+<td rowspan="1" colspan="1">3.82</td>
+<td rowspan="1" colspan="1">0.922</td>
+<td rowspan="1" colspan="1">50.1</td>
+<td rowspan="1" colspan="1">59.3</td>
+<td rowspan="1" colspan="1">0.395</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">PhysNet</td>
+<td rowspan="1" colspan="1">1.04</td>
+<td rowspan="1" colspan="1">3.80</td>
+<td rowspan="1" colspan="1">0.923</td>
+<td rowspan="1" colspan="1">36.4</td>
+<td rowspan="1" colspan="1">43.8</td>
+<td rowspan="1" colspan="1">0.306</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">PhysFormer</td>
+<td rowspan="1" colspan="1">0.78</td>
+<td rowspan="1" colspan="1">2.83</td>
+<td rowspan="1" colspan="1">0.957</td>
+<td rowspan="1" colspan="1">28.8</td>
+<td rowspan="1" colspan="1">34.4</td>
+<td rowspan="1" colspan="1">0.450</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">1D CNN</td>
+<td rowspan="1" colspan="1">0.81</td>
+<td rowspan="1" colspan="1">2.97</td>
+<td rowspan="1" colspan="1">0.953</td>
+<td rowspan="1" colspan="1">14.36</td>
+<td rowspan="1" colspan="1">22.1</td>
+<td rowspan="1" colspan="1">0.424</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">NoobHeart</td>
+<td rowspan="1" colspan="1">1.57</td>
+<td rowspan="1" colspan="1">4.71</td>
+<td rowspan="1" colspan="1">0.883</td>
+<td rowspan="1" colspan="1">52.3</td>
+<td rowspan="1" colspan="1">57.3</td>
+<td rowspan="1" colspan="1">0.488</td>
+</tr>
+</tbody></table>
+</form>
 
 ### Cross-dataset testing on UBFC  
-|Model|MAE|RMSE|Pearson Coef.|   
-|:-:|:-:|:-:|:-:|  
-|DeepPhys|1.06|1.51|0.997|  
-|TS-CAN|0.99|1.44|0.997|  
-|PhysNet|0.92|1.46|0.997|  
-|PhysFormer|1.06|1.53|0.997|  
-|1D CNN|0.87|1.40|0.997|  
-|NoobHeart|1.14|1.69|0.996|  
+<form action="" method="post" name="form1" class="form" id="form1">
+<table width="100%" cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+<th rowspan="2" colspan="1">Model</td>
+<th colspan="3">HR</td>
+<th colspan="3">HRV-SDNN</td>
+</tr>
+<tr>
+<th rowspan="1" colspan="1">MAE</td>
+<th rowspan="1" colspan="1">RMSE</td>
+<th rowspan="1" colspan="1">Pearson Coef.</td>
+<th rowspan="1" colspan="1">MAE</td>
+<th rowspan="1" colspan="1">RMSE</th>
+<th rowspan="1" colspan="1">Pearson Coef.</th>
+</tr>
+</thead>
+<tbody align="center">
+<tr>
+<td rowspan="1" colspan="1">DeepPhys</td>
+<td rowspan="1" colspan="1">1.06</td>
+<td rowspan="1" colspan="1">1.51</td>
+<td rowspan="1" colspan="1">0.997</td>
+<td rowspan="1" colspan="1">30.0</td>
+<td rowspan="1" colspan="1">37.8</td>
+<td rowspan="1" colspan="1">0.648</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">TS-CAN</td>
+<td rowspan="1" colspan="1">0.99</td>
+<td rowspan="1" colspan="1">1.44</td>
+<td rowspan="1" colspan="1">0.997</td>
+<td rowspan="1" colspan="1">25.6</td>
+<td rowspan="1" colspan="1">31.8</td>
+<td rowspan="1" colspan="1">0.588</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">PhysNet</td>
+<td rowspan="1" colspan="1">0.92</td>
+<td rowspan="1" colspan="1">1.46</td>
+<td rowspan="1" colspan="1">0.997</td>
+<td rowspan="1" colspan="1">12.2</td>
+<td rowspan="1" colspan="1">14.9</td>
+<td rowspan="1" colspan="1">0.887</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">PhysFormer</td>
+<td rowspan="1" colspan="1">1.06</td>
+<td rowspan="1" colspan="1">1.53</td>
+<td rowspan="1" colspan="1">0.997</td>
+<td rowspan="1" colspan="1">8.37</td>
+<td rowspan="1" colspan="1">11.1</td>
+<td rowspan="1" colspan="1">0.921</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">1D CNN</td>
+<td rowspan="1" colspan="1">0.87</td>
+<td rowspan="1" colspan="1">1.40</td>
+<td rowspan="1" colspan="1">0.997</td>
+<td rowspan="1" colspan="1">4.73</td>
+<td rowspan="1" colspan="1">8.25</td>
+<td rowspan="1" colspan="1">0.911</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">NoobHeart</td>
+<td rowspan="1" colspan="1">1.14</td>
+<td rowspan="1" colspan="1">1.69</td>
+<td rowspan="1" colspan="1">0.996</td>
+<td rowspan="1" colspan="1">33.1</td>
+<td rowspan="1" colspan="1">36.5</td>
+<td rowspan="1" colspan="1">0.697</td>
+</tr>
+</tbody></table>
+</form>
 
 ### Cross-dataset testing on PURE  
-|Model|MAE|RMSE|Pearson Coef.|   
-|:-:|:-:|:-:|:-:|  
-|DeepPhys|2.80|8.31|0.937|  
-|TS-CAN|2.12|6.67|0.960|  
-|PhysNet|0.51|0.91|0.999|  
-|PhysFormer|1.63|9.45|0.941|  
-|1D CNN|0.37|0.63|1.000|  
-|NoobHeart|0.45|0.70|1.000|  
+<form action="" method="post" name="form1" class="form" id="form1">
+<table width="100%" cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+<th rowspan="2" colspan="1">Model</td>
+<th colspan="3">HR</td>
+<th colspan="3">HRV-SDNN</td>
+</tr>
+<tr>
+<th rowspan="1" colspan="1">MAE</td>
+<th rowspan="1" colspan="1">RMSE</td>
+<th rowspan="1" colspan="1">Pearson Coef.</td>
+<th rowspan="1" colspan="1">MAE</td>
+<th rowspan="1" colspan="1">RMSE</th>
+<th rowspan="1" colspan="1">Pearson Coef.</th>
+</tr>
+</thead>
+<tbody align="center">
+<tr>
+<td rowspan="1" colspan="1">DeepPhys</td>
+<td rowspan="1" colspan="1">2.80</td>
+<td rowspan="1" colspan="1">8.31</td>
+<td rowspan="1" colspan="1">0.937</td>
+<td rowspan="1" colspan="1">86.0</td>
+<td rowspan="1" colspan="1">92.0</td>
+<td rowspan="1" colspan="1">0.297</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">TS-CAN</td>
+<td rowspan="1" colspan="1">2.12</td>
+<td rowspan="1" colspan="1">6.67</td>
+<td rowspan="1" colspan="1">0.960</td>
+<td rowspan="1" colspan="1">61.4</td>
+<td rowspan="1" colspan="1">74.1</td>
+<td rowspan="1" colspan="1">0.293</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">PhysNet</td>
+<td rowspan="1" colspan="1">0.51</td>
+<td rowspan="1" colspan="1">0.91</td>
+<td rowspan="1" colspan="1">0.999</td>
+<td rowspan="1" colspan="1">22.5</td>
+<td rowspan="1" colspan="1">35.7</td>
+<td rowspan="1" colspan="1">0.560</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">PhysFormer</td>
+<td rowspan="1" colspan="1">1.63</td>
+<td rowspan="1" colspan="1">9.45</td>
+<td rowspan="1" colspan="1">0.941</td>
+<td rowspan="1" colspan="1">21.6</td>
+<td rowspan="1" colspan="1">32.0</td>
+<td rowspan="1" colspan="1">0.576</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">1D CNN</td>
+<td rowspan="1" colspan="1">0.37</td>
+<td rowspan="1" colspan="1">0.63</td>
+<td rowspan="1" colspan="1">1.000</td>
+<td rowspan="1" colspan="1">9.51</td>
+<td rowspan="1" colspan="1">15.8</td>
+<td rowspan="1" colspan="1">0.872</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">NoobHeart</td>
+<td rowspan="1" colspan="1">0.45</td>
+<td rowspan="1" colspan="1">0.70</td>
+<td rowspan="1" colspan="1">1.000</td>
+<td rowspan="1" colspan="1">50.8</td>
+<td rowspan="1" colspan="1">58.1</td>
+<td rowspan="1" colspan="1">0.657</td>
+</tr>
+</tbody></table>
+</form>
 
 ## Training evaluation on SCAMPS  
 Training on synthetic datasets is difficult, and we observed that overfitting can easily occur, requiring many steps to prevent overfitting, such as controlling the learning rate, additional regularization operations, etc. We were unable to reproduce the performance of rPPG Toolbox but believe it is reproducible with more parameter tuning. Smaller models may not be prone to overfitting; NoobHeart is an example where we froze the LayerNormalization layer with initial parameters and trained for 5 epochs while achieving similar performance as training on real datasets. This could be the first step in training on synthetic datasets.  
