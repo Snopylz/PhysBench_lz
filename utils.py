@@ -527,6 +527,8 @@ def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selecto
     return {'Sliding window': {'MAE':round(mae(r), 3), 'RMSE':round(rmse(r), 3), 'R':round(R(r), 5)}, 'Whole video': {'MAE':round(mae(r_m), 3), 'RMSE':round(rmse(r_m), 3), 'R':round(R(r_m), 5)}}
 
 def get_metrics_HRV(result='result.h5', use_filter=True, selector=lambda s:True, **kw):
+    # Used the Heartpy toolkit, if you have used it, please cite the corresponding paper according to the webpage. 
+    # https://python-heart-rate-analysis-toolkit.readthedocs.io/
     def selector_(s):
         for k, v in kw.items():
             if k in s and v != s[k]:
