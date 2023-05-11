@@ -5,6 +5,8 @@ import time
 import tqdm
 import numpy as np
 import heartpy as hp
+import warnings
+warnings.simplefilter("ignore", UserWarning)
 from scipy.interpolate import UnivariateSpline
 import mediapipe as mp
 import alphashape
