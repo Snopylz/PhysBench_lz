@@ -98,7 +98,7 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 <td rowspan="1" colspan="1">0.81</td>
 <td rowspan="1" colspan="1">2.97</td>
 <td rowspan="1" colspan="1">0.953</td>
-<td rowspan="1" colspan="1">14.36</td>
+<td rowspan="1" colspan="1">14.4</td>
 <td rowspan="1" colspan="1">22.1</td>
 <td rowspan="1" colspan="1">0.424</td>
 </tr>
