@@ -4,6 +4,7 @@ import cv2
 import time
 import tqdm
 import numpy as np
+import heartpy as hp
 from scipy.interpolate import UnivariateSpline
 import mediapipe as mp
 import alphashape
@@ -502,10 +503,12 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, step=1, save
             _.create_dataset('label', data=label)
             _.create_dataset('timestamp', data=j['timestamp'])
 
+mae, rmse, R = lambda r:np.mean([abs(i[0]-i[1]) for i in r]), lambda r:np.mean([(i[0]-i[1])**2 for i in r])**0.5, lambda r:np.corrcoef(np.array(r).T)[0, 1]
+
 def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selector=lambda s:True, **kw):
     def selector_(s):
         for k, v in kw.items():
-            if k in i.attrs and v != i.attrs[k]:
+            if k in s and v != s[k]:
                 return False
         return selector(s)
     r, r_m = [], []
@@ -519,10 +522,33 @@ def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selecto
             r_m.append((get_hr(label, sr=fps), get_hr(bandpass_filter(predict, fs=fps) if use_filter else predict, sr=fps)))
             for t in np.arange(0, label.shape[0]-(window*fps)//2, step*fps).astype(int):
                 r.append((get_hr(label[t:t+round(window*fps)], sr=fps), get_hr(bandpass_filter(predict[t:t+round(window*fps)], fs=fps) if use_filter else predict[t:t+round(window*fps)], sr=fps)))
-    mae = np.mean([abs(i[0]-i[1]) for i in r])
-    rmse = np.mean([(i[0]-i[1])**2 for i in r])**0.5
-    R = np.corrcoef(np.array(r).T)[0, 1]
-    mae_m = np.mean([abs(i[0]-i[1]) for i in r_m])
-    rmse_m = np.mean([(i[0]-i[1])**2 for i in r_m])**0.5
-    R_m = np.corrcoef(np.array(r_m).T)[0, 1]
-    return {'Sliding window': {'MAE':round(mae, 3), 'RMSE':round(rmse, 3), 'R':round(R, 5)}, 'Whole video': {'MAE':round(mae_m, 3), 'RMSE':round(rmse_m, 3), 'R':round(R_m, 5)}}
+    return {'Sliding window': {'MAE':round(mae(r), 3), 'RMSE':round(rmse(r), 3), 'R':round(R(r), 5)}, 'Whole video': {'MAE':round(mae(r_m), 3), 'RMSE':round(rmse(r_m), 3), 'R':round(R(r_m), 5)}}
+
+def get_metrics_HRV(result='result.h5', use_filter=True, selector=lambda s:True, **kw):
+    def selector_(s):
+        for k, v in kw.items():
+            if k in s and v != s[k]:
+                return False
+        return selector(s)
+    SDNN = []
+    with h5py.File(result, 'r') as f:
+        for i, j in f.items(): 
+            if not selector_(j.attrs):
+                continue
+            fps = 1/(j['timestamp'][1:] - j['timestamp'][:-1]).mean()
+            label = j['label'][:]
+            predict = j['predict'][:]
+            if use_filter:
+                """
+                Butterworth filters can change the peak position, which may have a negative impact on HRV estimation based on peak detection.
+                However, when the noise is large, this is the only choice and whether to use a filter should be decided according to needs.
+                """
+                predict = bandpass_filter(predict, fs=fps)
+            r1, r2 = hp.process(label, fps)[1], hp.process(predict, fps)[1]
+            if np.isnan(r1['sdnn']):
+                continue
+            SDNN.append((r1['sdnn'], r2['sdnn']))
+    return {'SDNN':{'MAE':round(mae(SDNN), 3), 'RMSE':round(rmse(SDNN), 3), 'R':round(R(SDNN), 5)},}
+            
+
+    
