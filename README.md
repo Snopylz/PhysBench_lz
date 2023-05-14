@@ -6,14 +6,14 @@
 We implemented 6 neural models and 3 unsupervised models, DeepPhys, TS-CAN, PhysNet, PhysFormer, 1D CNN, NoobHeart, Chrom, ICA, and POS. Among them, the 1D CNN is a new model we proposed that uses only one-dimensional convolution with minimal computational complexity and high performance. NoobHeart is a toy model used in the tutorial with only 361 parameters and includes a simple 2 layers 3-dimensional convolution structure; however it has decent performance making it suitable as an entry-level model. Chrom，ICA，and POS are three unsupervised models. Among the neural models，PhysFormer is implemented using Pytorch while others use Tensorflow.  
 
 For unsupervised methods, please refer to `unsupervised_methods.py`; for methods implemented using TensorFlow, please refer to `models.py`; for methods implemented using PyTorch, please refer to `models_torch.py`. Our framework is not dependent on a specific deep learning framework. Please configure the environment as needed and install the required packages using `requirements.txt`.
-|Model|Resolution|Params|Frame FLOPs|Type|  
-|:-:|:-:|:-:|:-:|---|  
-|DeepPhys|36x36|532K|52M|2D CNN|  
-|TS-CAN|36x36|532K|52M|2D CNN|  
-|PhysNet|32x32|770K|54M|3D CNN|  
-|PhysFormer|128x128|7.03M|324M|Transformer|  
-|1D CNN|8x8|196K|261K|1D CNN|  
-|NoobHeart|8x8|361|5790|3D CNN|  
+|Model|Publication|Resolution|Params|Frame FLOPs|Type|  
+|:-:|:-:|:-:|:-:|:-:|---|  
+|DeepPhys|ECCV 19|36x36|532K|52M|2D CNN|  
+|TS-CAN|NIPS 20|36x36|532K|52M|2D CNN|  
+|PhysNet|BMVC 19|32x32|770K|54M|3D CNN|  
+|PhysFormer|CVPR 22|128x128|7.03M|324M|Transformer|  
+|1D CNN|This paper|8x8|196K|261K|1D CNN|  
+|NoobHeart|This paper|8x8|361|5790|3D CNN|  
 ## Datasets  
 Adding a dataset is simple, just write a loader and include a file directory (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, PURE, and SCAMPS. You can use our recording program `PhysRecorder/PhysRecorder.exe` to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
 |Dataset|Participants|Frames|Synchronicity|  
