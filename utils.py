@@ -252,6 +252,12 @@ def load_dataset(files, loader:Loader, threads=8):
             yield i
                 
 def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), threads=8, compression=9):
+    if isinstance(files, pd.DataFrame):
+        if not labels:
+            labels = [files.loc[i].to_dict() for i in range(len(files))]
+        else:
+            labels = [{**files.loc[i].to_dict(), **labels[i]} for i in range(len(files))]
+        files = list(files['file'])
     def resize(x, b):
         if np.min(b)<0 or np.isnan(b).any():
             return None
@@ -449,7 +455,7 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, buffer=32, gnoise=0)
         
     return _()
 
-def eval_on_dataset(dataset, model, input_frames, input_resolution, step=1, save='result.h5', batch=4, sample=cv2.INTER_AREA, ipt_dtype=np.float16):
+def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', step=1, save='result.h5', batch=4, sample=cv2.INTER_AREA, ipt_dtype=np.float16):
     if not callable(sample):
         interpolation = sample
         sample = lambda x, y:cv2.resize(x, y, interpolation=interpolation)
@@ -457,6 +463,7 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, step=1, save
         fo.attrs['model'] = model.name if hasattr(model, 'name') else ''
         fo.attrs['time'] = time.time()
         fo.attrs['dataset'] = os.path.abspath(dataset)
+        fo.attrs['output'] = output
         for i, j in tqdm.tqdm(fi.items()):
             fps = 1/(j['timestamp'][1:]-j['timestamp'][:-1]).mean()
             try:
@@ -500,7 +507,8 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, step=1, save
             _ = fo.create_group(i)
             for k in j.attrs:
                 _.attrs[k] = j.attrs[k]
-            _.attrs['SNR'] = SNR(label, predict)
+            if output=='BVP':
+                _.attrs['SNR'] = SNR(label, predict)
             _.create_dataset('predict', data=predict, dtype=np.float32)
             _.create_dataset('label', data=label)
             _.create_dataset('timestamp', data=j['timestamp'])
@@ -508,6 +516,7 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, step=1, save
 mae, rmse, R = lambda r:np.mean([abs(i[0]-i[1]) for i in r]), lambda r:np.mean([(i[0]-i[1])**2 for i in r])**0.5, lambda r:np.corrcoef(np.array(r).T)[0, 1]
 
 def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selector=lambda s:True, **kw):
+    global r, r_m
     def selector_(s):
         for k, v in kw.items():
             if k in s and v != s[k]:
@@ -515,20 +524,24 @@ def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selecto
         return selector(s)
     r, r_m = [], []
     with h5py.File(result, 'r') as f:
+        if 'output' in f.attrs and f.attrs['output'] == 'HR':
+            #predict_hr = lambda x, **kw :np.median(x)
+            predict_hr = lambda x, **kw :x.mean()
+            use_filter = False
+        else:
+            predict_hr = get_hr
         for i, j in f.items(): 
             if not selector_(j.attrs):
                 continue
             fps = 1/(j['timestamp'][1:] - j['timestamp'][:-1]).mean()
             label = j['label'][:]
             predict = j['predict'][:]
-            r_m.append((get_hr(label, sr=fps), get_hr(bandpass_filter(predict, fs=fps) if use_filter else predict, sr=fps)))
+            r_m.append((get_hr(label, sr=fps), predict_hr(bandpass_filter(predict, fs=fps) if use_filter else predict, sr=fps)))
             for t in np.arange(0, label.shape[0]-(window*fps)//2, step*fps).astype(int):
-                r.append((get_hr(label[t:t+round(window*fps)], sr=fps), get_hr(bandpass_filter(predict[t:t+round(window*fps)], fs=fps) if use_filter else predict[t:t+round(window*fps)], sr=fps)))
+                r.append((get_hr(label[t:t+round(window*fps)], sr=fps), predict_hr(bandpass_filter(predict[t:t+round(window*fps)], fs=fps) if use_filter else predict[t:t+round(window*fps)], sr=fps)))
     return {'Sliding window': {'MAE':round(mae(r), 3), 'RMSE':round(rmse(r), 3), 'R':round(R(r), 5)}, 'Whole video': {'MAE':round(mae(r_m), 3), 'RMSE':round(rmse(r_m), 3), 'R':round(R(r_m), 5)}}
 
 def get_metrics_HRV(result='result.h5', use_filter=True, selector=lambda s:True, **kw):
-    # Used the Heartpy toolkit, if you have used it, please cite the corresponding paper according to the webpage. 
-    # https://python-heart-rate-analysis-toolkit.readthedocs.io/
     def selector_(s):
         for k, v in kw.items():
             if k in s and v != s[k]:
