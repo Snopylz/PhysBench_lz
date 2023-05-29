@@ -1,6 +1,6 @@
 # PhysBench 
 ### Please use the [Tutorial/Noob Heart.ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart.ipynb) to learn about this framework.
-
+![image](https://github.com/KegangWangCCNU/PICS/blob/main/PhysBench.gif)  
 ## Models  
 
 We implemented 6 neural models and 3 unsupervised models, DeepPhys, TS-CAN, PhysNet, PhysFormer, 1D CNN, NoobHeart, Chrom, ICA, and POS. Among them, the 1D CNN is a new model we proposed that uses only one-dimensional convolution with minimal computational complexity and high performance. NoobHeart is a toy model used in the tutorial with only 361 parameters and includes a simple 2 layers 3-dimensional convolution structure; however it has decent performance making it suitable as an entry-level model. Chrom，ICA，and POS are three unsupervised models. Among the neural models，PhysFormer is implemented using Pytorch while others use Tensorflow.  
@@ -282,8 +282,6 @@ Pearson Coef.: 0.999
 
 ## Visualization  
 Please run `visualization.py` to open the visualization webpage. Before visualizing, make sure all result files are saved in the `results` folder. When the framework generates result files, it links to the dataset files, so the visualization webpage can display face images synchronously. Once the link is invalid, such as when dataset files are moved, faces cannot be displayed on the webpage.  
-
-![image](https://github.com/KegangWangCCNU/PICS/blob/main/PhysBench.gif)  
 
 ## Limitation  
 The test data used by PhysBench may not necessarily reflect the accuracy in real-world scenarios, where there are more diverse lighting conditions, head movements, skin tones and age groups. The heart rate provided by the algorithm through Welch method may not fully comply with medical standards and requires further rigorous evaluation before clinical use. We aim to inform users of the weaknesses and limitations of the algorithm as much as possible through the visualization webpage.
