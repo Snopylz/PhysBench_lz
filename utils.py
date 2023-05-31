@@ -262,7 +262,7 @@ def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), thre
         if np.min(b)<0 or np.isnan(b).any():
             return None
         b = np.int32(b)
-        return cv2.resize(x[slice(*b[1]), slice(*b[0])], resolution[::-1])
+        return cv2.resize(x[slice(*b[1]), slice(*b[0])], resolution[::-1], interpolation=cv2.INTER_AREA)
     print(f'Generating dataset {target} .....')
     with h5py.File(target, 'w') as f:
         def dump(x):
