@@ -15,7 +15,7 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |Seq-rPPG|This paper|8x8|196K|261K|1D CNN|  
 |NoobHeart|This paper|8x8|361|5790|3D CNN|  
 ## Datasets  
-Adding a dataset is simple, just write a loader and include a file directory (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, PURE, and SCAMPS. You can use our recording program `PhysRecorder/PhysRecorder.exe` to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
+Adding a dataset is simple, just write a loader and include a file directory (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, PURE, and SCAMPS. You can use our recording program PhysRecorder(https://github.com/KegangWangCCNU/PhysRecorder) to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
 |Dataset|Participants|Frames|Synchronicity|  
 |:-:|:-:|:-:|:-:|  
 |RLAP|58|3.53M|Good|   
