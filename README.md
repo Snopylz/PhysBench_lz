@@ -28,7 +28,7 @@ Train on our RLAP dataset, please see the `benchmark_RLAP` folder. Train on the 
 ## Inference on a single video  
 To extract BVP signals from your own collected video, please execute the following code.  
 `python inference.py --video face.avi --out BVP.csv `  
-Its output `BVP.csv` contains the BVP signal values corresponding to each frame. 
+Its output `BVP.csv` contains the BVP signal values corresponding to each frame.   
 By default, it uses a pre-trained 1D CNN model (i.e., Seq-rPPG) on RLAP.
 
 ## Training evaluation on RLAP  
