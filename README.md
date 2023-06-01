@@ -294,7 +294,7 @@ The test data used by PhysBench may not necessarily reflect the accuracy in real
 
 ## Request RLAP dataset  
 
-If you wish to obtain the RLAP dataset, please send an email to kegangwang@mails.ccnu.edu.cn and cc yantaowei@ccnu.edu.cn, with the Data Usage Agreement attached.
+If you wish to obtain the RLAP dataset, please send an email to kegangwang@mails.ccnu.edu.cn and cc yantaowei@ccnu.edu.cn, with the Data Usage Agreement attached.  
 See https://github.com/KegangWangCCNU/RLAP-dataset 
 
 ## Citation  
