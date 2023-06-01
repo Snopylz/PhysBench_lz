@@ -12,7 +12,7 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |TS-CAN|NIPS 20|36x36|532K|52M|2D CNN|  
 |PhysNet|BMVC 19|32x32|770K|54M|3D CNN|  
 |PhysFormer|CVPR 22|128x128|7.03M|324M|Transformer|  
-|1D CNN|This paper|8x8|196K|261K|1D CNN|  
+|Seq-rPPG|This paper|8x8|196K|261K|1D CNN|  
 |NoobHeart|This paper|8x8|361|5790|3D CNN|  
 ## Datasets  
 Adding a dataset is simple, just write a loader and include a file directory (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, PURE, and SCAMPS. You can use our recording program `PhysRecorder/PhysRecorder.exe` to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
@@ -25,6 +25,12 @@ Adding a dataset is simple, just write a loader and include a file directory (us
 ## Train and Test
 Train on our RLAP dataset, please see the `benchmark_RLAP` folder. Train on the SCAMPS dataset, please see the `benchmark_SCAMPS` folder. In addition, for ablation experiments and training on PURE and UBFC, please see `benchmark_addition`. All code is provided in Jupyter notebooks with our replication included; if you have read the tutorial, replicating results should be easy.   
 
+## Inference on a single video  
+To extract BVP signals from your own collected video, please execute the following code.  
+`python inference.py --video face.avi --out BVP.csv `  
+Its output `BVP.csv` contains the BVP signal values corresponding to each frame. 
+By default, it uses a pre-trained 1D CNN model (i.e., Seq-rPPG) on RLAP.
+
 ## Training evaluation on RLAP  
 RLAP is an appropriate training set, and we divide RLAP into training ,validation and testing set. In addition, tests were also conducted on the entire UBFC and PURE datasets. For code and results, please refer to `benchmark_RLAP`.  
 
@@ -35,7 +41,7 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 |TS-CAN|1.23|3.59|0.937|  
 |PhysNet|1.12|4.13|0.916|  
 |PhysFormer|1.56|6.28|0.803|  
-|1D CNN|1.07|4.15|0.917|  
+|Seq-rPPG|1.07|4.15|0.917|  
 |NoobHeart|1.79|5.85|0.832|  
 
 ### Intra-dataset testing on RLAP-rPPG  
@@ -94,7 +100,7 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 <td rowspan="1" colspan="1">0.450</td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">1D CNN</td>
+<td rowspan="1" colspan="1">Seq-rPPG</td>
 <td rowspan="1" colspan="1">0.81</td>
 <td rowspan="1" colspan="1">2.97</td>
 <td rowspan="1" colspan="1">0.953</td>
@@ -170,7 +176,7 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 <td rowspan="1" colspan="1">0.921</td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">1D CNN</td>
+<td rowspan="1" colspan="1">Seq-rPPG</td>
 <td rowspan="1" colspan="1">0.87</td>
 <td rowspan="1" colspan="1">1.40</td>
 <td rowspan="1" colspan="1">0.997</td>
@@ -246,7 +252,7 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 <td rowspan="1" colspan="1">0.576</td>
 </tr>
 <tr>
-<td rowspan="1" colspan="1">1D CNN</td>
+<td rowspan="1" colspan="1">Seq-rPPG</td>
 <td rowspan="1" colspan="1">0.37</td>
 <td rowspan="1" colspan="1">0.63</td>
 <td rowspan="1" colspan="1">1.000</td>
