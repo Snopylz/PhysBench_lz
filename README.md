@@ -10,6 +10,7 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |:-:|:-:|:-:|:-:|:-:|---|  
 |DeepPhys|ECCV 19|36x36|532K|52M|2D CNN|  
 |TS-CAN|NIPS 20|36x36|532K|52M|2D CNN|  
+|EfficientPhys|WACV 23|72x72|2.16M|230M|2D CNN| 
 |PhysNet|BMVC 19|32x32|770K|54M|3D CNN|  
 |PhysFormer|CVPR 22|128x128|7.03M|324M|Transformer|  
 |Seq-rPPG|This paper|8x8|196K|261K|1D CNN|  
@@ -39,6 +40,7 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 |:-:|:-:|:-:|:-:|  
 |DeepPhys|1.52|4.40|0.906|  
 |TS-CAN|1.23|3.59|0.937|  
+|EfficientPhys|1.10|3.96|0.925|  
 |PhysNet|1.12|4.13|0.916|  
 |PhysFormer|1.56|6.28|0.803|  
 |Seq-rPPG|1.07|4.15|0.917|  
@@ -80,6 +82,15 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 <td rowspan="1" colspan="1">50.1</td>
 <td rowspan="1" colspan="1">59.3</td>
 <td rowspan="1" colspan="1">0.395</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">EfficientPhys</td>
+<td rowspan="1" colspan="1">1.16</td>
+<td rowspan="1" colspan="1">4.49</td>
+<td rowspan="1" colspan="1">0.900</td>
+<td rowspan="1" colspan="1">47.7</td>
+<td rowspan="1" colspan="1">56.9</td>
+<td rowspan="1" colspan="1">0.332</td>
 </tr>
 <tr>
 <td rowspan="1" colspan="1">PhysNet</td>
@@ -158,6 +169,15 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 <td rowspan="1" colspan="1">0.588</td>
 </tr>
 <tr>
+<td rowspan="1" colspan="1">EfficientPhys</td>
+<td rowspan="1" colspan="1">1.08</td>
+<td rowspan="1" colspan="1">1.47</td>
+<td rowspan="1" colspan="1">0.997</td>
+<td rowspan="1" colspan="1">9.76</td>
+<td rowspan="1" colspan="1">15.0</td>
+<td rowspan="1" colspan="1">0.827</td>
+</tr>
+<tr>
 <td rowspan="1" colspan="1">PhysNet</td>
 <td rowspan="1" colspan="1">0.92</td>
 <td rowspan="1" colspan="1">1.46</td>
@@ -232,6 +252,15 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 <td rowspan="1" colspan="1">61.4</td>
 <td rowspan="1" colspan="1">74.1</td>
 <td rowspan="1" colspan="1">0.293</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">EfficientPhys</td>
+<td rowspan="1" colspan="1">1.39</td>
+<td rowspan="1" colspan="1">5.98</td>
+<td rowspan="1" colspan="1">0.968</td>
+<td rowspan="1" colspan="1">31.9</td>
+<td rowspan="1" colspan="1">49.0</td>
+<td rowspan="1" colspan="1">0.388</td>
 </tr>
 <tr>
 <td rowspan="1" colspan="1">PhysNet</td>
