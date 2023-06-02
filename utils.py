@@ -18,6 +18,7 @@ import inspect
 from concurrent.futures import ThreadPoolExecutor
 import threading
 from scipy.signal import welch, butter, lfilter
+from scipy.sparse import spdiags
 
 def get_hr(y, sr=30, min=30, max=180):
     p, q = welch(y, sr, nfft=1e5/sr, nperseg=np.min((len(y)-1, 256)))
@@ -32,6 +33,29 @@ def get_hrv(y, sr=30):
     LF = q[(p>.04)&(p<.15)].sum()/TP
     return RF, LF, HF, LF/HF
 
+def detrend(signal, Lambda=25):
+    def _detrend(signal, Lambda=Lambda):
+        """detrend(signal, Lambda) -> filtered_signal
+        This code is based on the following article "An advanced detrending method with application
+        to HRV analysis". Tarvainen et al., IEEE Trans on Biomedical Engineering, 2002.
+        """
+        signal_length = signal.shape[0]
+        H = np.identity(signal_length)
+        ones = np.ones(signal_length)
+        minus_twos = -2 * np.ones(signal_length)
+        diags_data = np.array([ones, minus_twos, ones])
+        diags_index = np.array([0, 1, 2])
+        D = spdiags(diags_data, diags_index, (signal_length - 2), signal_length).toarray()
+        filtered_signal = np.dot((H - np.linalg.inv(H + (Lambda ** 2) * np.dot(D.T, D))), signal)
+        return filtered_signal
+    rst = np.zeros_like(signal)
+    for i in np.arange(0, signal.shape[0], 900):
+        if i<=signal.shape[0]-900:
+            rst[i:i+900] = _detrend(signal[i:i+900])
+        else:
+            rst[i:] = _detrend(signal[-900:])[-(rst.shape[0]-i):]
+    return rst
+
 def bandpass_filter(data, lowcut=0.6, highcut=2.5, fs=30, order=2):
     b, a = butter(order, [lowcut, highcut], fs=fs, btype='band')
     return lfilter(b, a, data)
@@ -39,8 +63,10 @@ def bandpass_filter(data, lowcut=0.6, highcut=2.5, fs=30, order=2):
 def SNR(x, y):
     x, y = (x-np.expand_dims(np.mean(x, axis=-1), -1))/(np.expand_dims(np.std(x, axis=-1), -1)+1e-6), (y-np.expand_dims(np.mean(y, axis=-1), -1))/(np.expand_dims(np.std(y, axis=-1), -1)+1e-6)
     A_s = np.mean(np.abs(np.fft.rfft(x)), axis=-1)
-    A_n = np.mean(np.abs(np.fft.rfft(y-x)), axis=-1)
-    return 8.685889*np.log(A_s/A_n)
+    #A_n = np.mean(np.abs(np.fft.rfft(y-x)), axis=-1)
+    A_n = np.mean(np.abs(np.fft.rfft(y)), axis=-1) - A_s
+    return 8.685889*np.log((A_s/A_n)**2)
+    #return (A_s/A_n)**2
 
 def norm_bvp(bvp, order=1):
     order -= 1
@@ -455,7 +481,7 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, buffer=32, gnoise=0)
         
     return _()
 
-def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', step=1, save='result.h5', batch=4, sample=cv2.INTER_AREA, ipt_dtype=np.float16):
+def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', step=1, save='result.h5', batch=4, cumsum=False, sample=cv2.INTER_AREA, ipt_dtype=np.float16):
     if not callable(sample):
         interpolation = sample
         sample = lambda x, y:cv2.resize(x, y, interpolation=interpolation)
@@ -503,6 +529,8 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
             if not result:
                 continue
             predict = np.nanmean(result, axis=0)
+            if cumsum:
+                predict = detrend(np.cumsum(predict))
             label = j['bvp'][:]
             _ = fo.create_group(i)
             for k in j.attrs:

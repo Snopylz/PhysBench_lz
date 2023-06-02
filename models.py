@@ -6,31 +6,6 @@ import keras.backend as K
 from tensorflow.keras import layers
 from tensorflow.python.profiler.model_analyzer import profile
 from tensorflow.python.profiler.option_builder import ProfileOptionBuilder
-from scipy.sparse import spdiags
-import numpy as np
-
-def detrend(signal, Lambda=25):
-    def _detrend(signal, Lambda=Lambda):
-        """detrend(signal, Lambda) -> filtered_signal
-        This code is based on the following article "An advanced detrending method with application
-        to HRV analysis". Tarvainen et al., IEEE Trans on Biomedical Engineering, 2002.
-        """
-        signal_length = signal.shape[0]
-        H = np.identity(signal_length)
-        ones = np.ones(signal_length)
-        minus_twos = -2 * np.ones(signal_length)
-        diags_data = np.array([ones, minus_twos, ones])
-        diags_index = np.array([0, 1, 2])
-        D = spdiags(diags_data, diags_index, (signal_length - 2), signal_length).toarray()
-        filtered_signal = np.dot((H - np.linalg.inv(H + (Lambda ** 2) * np.dot(D.T, D))), signal)
-        return filtered_signal
-    rst = np.zeros_like(signal)
-    for i in np.arange(0, signal.shape[0], 900):
-        if i<=signal.shape[0]-900:
-            rst[i:i+900] = _detrend(signal[i:i+900])
-        else:
-            rst[i:] = _detrend(signal[-900:])[-(rst.shape[0]-i):]
-    return rst
 
 def get_flops(model, input_sig=[tf.TensorSpec([1, 450, 8, 8, 3])]):
     forward_pass = tf.function(
@@ -202,7 +177,7 @@ class M_3(keras.Model):
         return self.z(x)
 
 """
-TS-CAN & DeepPhys ↓
+TS-CAN & DeepPhys & EfficientPhys ↓
 """
 
 class Attention_mask(tf.keras.layers.Layer):
@@ -359,6 +334,54 @@ class TS_CAN_end_to_end(keras.Model):
         x_ = x[1:] - x[:-1]
         x_ = (x_ - tf.reshape(tf.reduce_mean(x_, axis=(1,2 )), (-1, 1, 1, 3)))/tf.reshape(tf.math.reduce_std(x_, axis=(1, 2))+1e-6, (-1, 1, 1, 3))
         return self.ts_can((tf.concat([x_, tf.zeros([1, *self.size, 3])], axis=0), tf.expand_dims(tf.reduce_mean(x, axis=(0, )), axis=0)))
+    
+
+class EP(keras.Model):
+    def __init__(self, n=32):
+        super().__init__()
+        self.n_frame = n
+        self.TSM = TSM()
+        self.mc1 = layers.Conv2D(32, kernel_size=3, padding='same', activation='tanh')
+        self.mc2 = layers.Conv2D(32, kernel_size=3, activation='tanh')
+        self.mc3 = layers.Conv2D(64, kernel_size=3, padding='same', activation='tanh')
+        self.mc4 = layers.Conv2D(64, kernel_size=3, activation='tanh')
+        self.attc1 = layers.Conv2D(1, kernel_size=1, activation='sigmoid')
+        self.msk = Attention_mask()
+        self.attc2 = layers.Conv2D(1, kernel_size=1, activation='sigmoid')
+        self.avgp = layers.AvgPool2D(2)
+        self.dp1 = layers.Dropout(0.25)
+        self.dp2 = layers.Dropout(0.5)
+        self.dense1 = layers.Dense(128 ,activation='tanh')
+        self.dense2 = layers.Dense(1)
+        self.bn = layers.BatchNormalization()
+        self.ft = layers.Flatten()
+
+    def call(self, x):
+        x = x[1:]-x[:-1]
+        x = tf.concat([x, tf.zeros([1, 72, 72, 3])], axis=0)
+        x = self.bn(x)
+        x = self.TSM(x, self.n_frame)
+        x = self.mc1(x)
+        x = self.TSM(x, self.n_frame)
+        x = self.mc2(x)
+        msk = self.msk(self.attc1(x))
+        x = layers.multiply([x, msk])
+        x = self.avgp(x)
+        x = self.dp1(x)
+        x = self.TSM(x, self.n_frame)
+        x = self.mc3(x)
+        x = self.TSM(x, self.n_frame)
+        x = self.mc4(x)
+        msk = self.msk(self.attc2(x))
+        x = layers.multiply([x, msk])
+        x = self.avgp(x)
+        x = self.dp1(x)
+        #x = tf.reshape(x, (-1, tf.reduce_prod(x.get_shape()[1:])))
+        x = self.ft(x)
+        x = self.dense1(x)
+        x = self.dp2(x)
+        x = self.dense2(x)
+        return x
 
 """
 PhysNet ↓
@@ -463,6 +486,77 @@ class PhysNet(keras.Model):
         return x
     
 """
+ResNet ↓
+
+resnet18 = ResNet([2, 2, 2, 2])
+"""
+class BasicBlock(layers.Layer):
+
+    def __init__(self, filter_num, stride=1):
+        super().__init__()
+        self.conv1 = layers.Conv2D(filter_num, 3, strides=stride, padding='same')
+        self.bn1 = layers.BatchNormalization()
+        self.relu = layers.ReLU()
+        self.conv2 = layers.Conv2D(filter_num, 3, strides=1, padding='same')
+        self.bn2 = layers.BatchNormalization()
+        if stride != 1:
+            self.downsample = keras.Sequential()
+            self.downsample.add(layers.Conv2D(filter_num, (1, 1), strides=stride))
+        else:
+            self.downsample = lambda x:x
+
+    def call(self, inputs, training=False):
+        out = self.conv1(inputs, training=training)
+        out = self.bn1(out)
+        out = self.relu(out)
+        out = self.conv2(out, training=training)
+        out = self.bn2(out)
+        identity = self.downsample(inputs)
+        output = layers.add([out, identity])
+        output = self.relu(output)
+        return output
+
+class ResNet(keras.Model):
+    def __init__(self, layer_dims, out=1):
+        super(ResNet, self).__init__()
+        # 第一层
+        self.stem = keras.Sequential([
+                                  layers.Conv2D(64, 7, strides=(1, 1)),
+                                  layers.BatchNormalization(),
+                                  layers.Activation('relu'),
+                                  layers.AvgPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')
+                                  ])
+        # 中间层的四个残差块：conv2_x，conv3_x，conv4_x，conv5_x
+        self.layer1 = self.build_resblock(64,  layer_dims[0])
+        self.layer2 = self.build_resblock(128, layer_dims[1], stride=2)
+        self.layer3 = self.build_resblock(256, layer_dims[2], stride=2)
+        self.layer4 = self.build_resblock(512, layer_dims[3], stride=2)
+        # 池化
+        self.pool = layers.AvgPool2D(7, padding='same')
+        
+        # 全连接层
+        self.fc = keras.Sequential([layers.Flatten(), layers.Dense(out)])
+        
+    def call(self, inputs, training=None, **kwargs):
+        x = inputs
+        x = self.stem(x,training=training)
+        x = self.layer1(x,training=training)
+        x = self.layer2(x,training=training)
+        x = self.layer3(x,training=training)
+        x = self.layer4(x,training=training)
+        x = self.pool(x,training=training)
+        x1 = self.fc(x,training=training)
+        return x1
+
+    # 构建残差块（将几个相同的残差模块堆叠在一起）
+    def build_resblock(self, filter_num, blocks, stride=1):
+        res_blocks = keras.Sequential()
+        res_blocks.add(BasicBlock(filter_num, stride))
+        for _ in range(1, blocks):
+            res_blocks.add(BasicBlock(filter_num, stride=1))
+        return res_blocks
+    
+"""
 loss ↓
 """
 
@@ -478,8 +572,10 @@ def np_loss(x, y):
 def SNR(x, y):
     x, y = (x-tf.expand_dims(tf.reduce_mean(x, axis=-1), -1))/(tf.expand_dims(tf.math.reduce_std(x, axis=-1), -1)+1e-6), (y-tf.expand_dims(tf.reduce_mean(y, axis=-1), -1))/(tf.expand_dims(tf.math.reduce_std(y, axis=-1), -1)+1e-6)
     A_s = tf.reduce_mean(tf.abs(tf.signal.rfft(x)), axis=-1)
-    A_n = tf.reduce_mean(tf.abs(tf.signal.rfft(y-x)), axis=-1)
-    return 8.685889*tf.math.log(A_s/A_n)
+    #A_n = tf.reduce_mean(tf.abs(tf.signal.rfft(y-x)), axis=-1)
+    A_n = tf.reduce_mean(tf.abs(tf.signal.rfft(y)), axis=-1) - A_s
+    return 8.685889*tf.math.log((A_s/A_n)**2)
+    #return (A_s/A_n)**2
 
 def nSNR_loss(x, y):
     return -SNR(x, y)
