@@ -16,13 +16,15 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |Seq-rPPG|This paper|8x8|196K|261K|1D CNN|  
 |NoobHeart|This paper|8x8|361|5790|3D CNN|  
 ## Datasets  
-Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
+Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
 |Dataset|Participants|Frames|Synchronicity|  
 |:-:|:-:|:-:|:-:|  
 |RLAP|58|3.53M|Good|   
 |PURE|10|106K|Good|  
-|UBFC|42|75K|Bad| 
+|UBFC-rPPG|42|75K|Bad| 
+|UBFC-PHYS|56|1.06M|-| 
 |SCAMPS|2800|1.68M|Good|  
+**Note: Our framework implemented UBFC-PHYS, but due to the large motion amplitude, there is a lot of noise in its Ground Truth, and the test results may not be reliable, so they are not listed.**
 ## Train and Test
 Train on our RLAP dataset, please see the `benchmark_RLAP` folder. Train on the SCAMPS dataset, please see the `benchmark_SCAMPS` folder. In addition, for ablation experiments and training on PURE and UBFC, please see `benchmark_addition`. All code is provided in Jupyter notebooks with our replication included; if you have read the tutorial, replicating results should be easy.   
 
@@ -131,7 +133,7 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 </tbody></table>
 </form>
 
-### Cross-dataset testing on UBFC  
+### Cross-dataset testing on UBFC-rPPG  
 <form action="" method="post" name="form1" class="form" id="form1">
 <table width="100%" cellpadding="0" cellspacing="0">
 <thead>
