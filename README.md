@@ -23,7 +23,7 @@ Adding a dataset is simple, just write a loader and include a index file (usuall
 |PURE|10|106K|YES|Good|  
 |UBFC-rPPG|42|75K|YES|Bad| 
 |UBFC-PHYS|56|1.06M|MJPG|-| 
-|SCAMPS|2800|1.68M|-|Good|  
+|SCAMPS|2800|1.68M|synthetics|Good|  
 
 
 **Note: Our framework implemented UBFC-PHYS, but due to the large motion amplitude, there is a lot of noise in its Ground Truth, and the test results may not be reliable, so they are not listed. Further measures may need to be taken to filter out inaccurate Ground Truth signals before the results can be released.**
