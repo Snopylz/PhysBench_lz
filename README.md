@@ -40,7 +40,7 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 |:-:|:-:|:-:|:-:|  
 |DeepPhys|1.52|4.40|0.906|  
 |TS-CAN|1.23|3.59|0.937|  
-|EfficientPhys|1.10|3.96|0.925|  
+|EfficientPhys|1.05|3.41|0.943|  
 |PhysNet|1.12|4.13|0.916|  
 |PhysFormer|1.56|6.28|0.803|  
 |Seq-rPPG|1.07|4.15|0.917|  
@@ -85,12 +85,12 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 </tr>
 <tr>
 <td rowspan="1" colspan="1">EfficientPhys</td>
-<td rowspan="1" colspan="1">1.16</td>
-<td rowspan="1" colspan="1">4.49</td>
-<td rowspan="1" colspan="1">0.900</td>
-<td rowspan="1" colspan="1">47.7</td>
-<td rowspan="1" colspan="1">56.9</td>
-<td rowspan="1" colspan="1">0.332</td>
+<td rowspan="1" colspan="1">1.00</td>
+<td rowspan="1" colspan="1">3.39</td>
+<td rowspan="1" colspan="1">0.939</td>
+<td rowspan="1" colspan="1">43.7</td>
+<td rowspan="1" colspan="1">53.7</td>
+<td rowspan="1" colspan="1">0.356</td>
 </tr>
 <tr>
 <td rowspan="1" colspan="1">PhysNet</td>
@@ -170,11 +170,11 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 </tr>
 <tr>
 <td rowspan="1" colspan="1">EfficientPhys</td>
-<td rowspan="1" colspan="1">1.08</td>
-<td rowspan="1" colspan="1">1.47</td>
+<td rowspan="1" colspan="1">1.03</td>
+<td rowspan="1" colspan="1">1.45</td>
 <td rowspan="1" colspan="1">0.997</td>
-<td rowspan="1" colspan="1">9.76</td>
-<td rowspan="1" colspan="1">15.0</td>
+<td rowspan="1" colspan="1">10.1</td>
+<td rowspan="1" colspan="1">15.4</td>
 <td rowspan="1" colspan="1">0.827</td>
 </tr>
 <tr>
@@ -255,12 +255,12 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 </tr>
 <tr>
 <td rowspan="1" colspan="1">EfficientPhys</td>
-<td rowspan="1" colspan="1">1.39</td>
-<td rowspan="1" colspan="1">5.98</td>
+<td rowspan="1" colspan="1">1.33</td>
+<td rowspan="1" colspan="1">5.97</td>
 <td rowspan="1" colspan="1">0.968</td>
-<td rowspan="1" colspan="1">31.9</td>
-<td rowspan="1" colspan="1">49.0</td>
-<td rowspan="1" colspan="1">0.388</td>
+<td rowspan="1" colspan="1">28.0</td>
+<td rowspan="1" colspan="1">44.0</td>
+<td rowspan="1" colspan="1">0.468</td>
 </tr>
 <tr>
 <td rowspan="1" colspan="1">PhysNet</td>
