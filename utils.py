@@ -63,8 +63,8 @@ def bandpass_filter(data, lowcut=0.6, highcut=2.5, fs=30, order=2):
 def SNR(x, y):
     x, y = (x-np.expand_dims(np.mean(x, axis=-1), -1))/(np.expand_dims(np.std(x, axis=-1), -1)+1e-6), (y-np.expand_dims(np.mean(y, axis=-1), -1))/(np.expand_dims(np.std(y, axis=-1), -1)+1e-6)
     A_s = np.mean(np.abs(np.fft.rfft(x)), axis=-1)
-    #A_n = np.mean(np.abs(np.fft.rfft(y-x)), axis=-1)
-    A_n = np.mean(np.abs(np.fft.rfft(y)), axis=-1) - A_s
+    A_n = np.mean(np.abs(np.fft.rfft(y-x)), axis=-1)
+    #A_n = np.mean(np.abs(np.fft.rfft(y)), axis=-1) - A_s
     return 8.685889*np.log((A_s/A_n)**2)
     #return (A_s/A_n)**2
 
@@ -135,6 +135,32 @@ class LoaderUBFCrPPG2(Loader):
             return _2(), f_i(ts), ts
         
 loader_ubfc_rppg2 = LoaderUBFCrPPG2(dataset_ubfc_rppg2)
+
+class LoaderUBFCPHYS(Loader):
+    
+    def __call__(self, vid):
+        bvp = pd.read_csv(f"{self.base}{vid.replace('vid_', 'bvp_')}"[:-4]+".csv").values.T[0]
+        ts = np.arange(len(bvp))/64
+        f_i = UnivariateSpline(ts, bvp, s=0)
+        _ = cv2.VideoCapture(f"{self.base}{vid}")
+        fps = _.get(cv2.CAP_PROP_FPS)
+        n = _.get(cv2.CAP_PROP_FRAME_COUNT)
+        _.release()
+        ts = np.arange(n)/fps
+        def _1():
+            cap = cv2.VideoCapture(f"{self.base}{vid}")
+            while 1:
+                _, frame = cap.read()
+                if _:
+                    yield cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                else:
+                    break
+        class _2:
+            def __iter__(self):
+                return _1()
+        return _2(), f_i(ts), ts
+    
+loader_ubfc_phys = LoaderUBFCPHYS(dataset_ubfc_phys)
 
 class LoaderPURE(Loader):
 
@@ -269,6 +295,9 @@ def load_dataset(files, loader:Loader, threads=8):
             try:
                 with h5py.File(f'{tmp}/{hash(base+f)}.h5', 'r') as _:
                     boxes, landmarks = _['boxes'][:], _['landmarks'][:]
+                if not boxes.shape[0]:
+                    os.remove(f'{tmp}/{hash(base+f)}.h5')
+                    return load(f)
             except:
                 os.remove(f'{tmp}/{hash(base+f)}.h5')
                 return load(f)
@@ -316,7 +345,7 @@ def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), thre
             _.create_dataset('bvp', data=np.array(bvp), compression=compression)
             _.create_dataset('timestamp', data=np.array(ts), compression=compression)
         with ThreadPoolExecutor(threads) as p:
-            for i in p.map(dump, enumerate(tqdm.tqdm(load_dataset(files, loader), total=len(files)))):
+            for i in tqdm.tqdm(p.map(dump, enumerate(load_dataset(files, loader))), total=len(files)):
                 pass
         with h5py.File(target, 'r+') as f:
             files = list(files)

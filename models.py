@@ -572,8 +572,8 @@ def np_loss(x, y):
 def SNR(x, y):
     x, y = (x-tf.expand_dims(tf.reduce_mean(x, axis=-1), -1))/(tf.expand_dims(tf.math.reduce_std(x, axis=-1), -1)+1e-6), (y-tf.expand_dims(tf.reduce_mean(y, axis=-1), -1))/(tf.expand_dims(tf.math.reduce_std(y, axis=-1), -1)+1e-6)
     A_s = tf.reduce_mean(tf.abs(tf.signal.rfft(x)), axis=-1)
-    #A_n = tf.reduce_mean(tf.abs(tf.signal.rfft(y-x)), axis=-1)
-    A_n = tf.reduce_mean(tf.abs(tf.signal.rfft(y)), axis=-1) - A_s
+    A_n = tf.reduce_mean(tf.abs(tf.signal.rfft(y-x)), axis=-1)
+    #A_n = tf.reduce_mean(tf.abs(tf.signal.rfft(y)), axis=-1) - A_s
     return 8.685889*tf.math.log((A_s/A_n)**2)
     #return (A_s/A_n)**2
 
