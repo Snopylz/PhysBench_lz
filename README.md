@@ -20,6 +20,7 @@ Adding a dataset is simple, just write a loader and include a index file (usuall
 |Dataset|Participants|Frames|Lossless|Synchronicity|  
 |:-:|:-:|:-:|:-:|:-:|  
 |RLAP|58|3.53M|MJPG|Good|   
+|RLAP-rPPG|58|781K|YES|Good|  
 |PURE|10|106K|YES|Good|  
 |UBFC-rPPG|42|75K|YES|Bad| 
 |UBFC-PHYS|56|1.06M|MJPG|-| 
