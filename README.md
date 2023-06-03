@@ -17,13 +17,13 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |NoobHeart|This paper|8x8|361|5790|3D CNN|  
 ## Datasets  
 Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
-|Dataset|Participants|Frames|Synchronicity|  
-|:-:|:-:|:-:|:-:|  
-|RLAP|58|3.53M|Good|   
-|PURE|10|106K|Good|  
-|UBFC-rPPG|42|75K|Bad| 
-|UBFC-PHYS|56|1.06M|-| 
-|SCAMPS|2800|1.68M|Good|  
+|Dataset|Participants|Frames|Lossless|Synchronicity|  
+|:-:|:-:|:-:|:-:|:-:|  
+|RLAP|58|3.53M|MJPG|Good|   
+|PURE|10|106K|YES|Good|  
+|UBFC-rPPG|42|YES|75K|Bad| 
+|UBFC-PHYS|56|1.06M|MJPG|-| 
+|SCAMPS|2800|1.68M|-|Good|  
 
 
 **Note: Our framework implemented UBFC-PHYS, but due to the large motion amplitude, there is a lot of noise in its Ground Truth, and the test results may not be reliable, so they are not listed. Further measures may need to be taken to filter out inaccurate Ground Truth signals before the results can be released.**
