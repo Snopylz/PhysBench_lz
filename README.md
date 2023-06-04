@@ -16,7 +16,7 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |Seq-rPPG|This paper|8x8|196K|261K|1D CNN|  
 |NoobHeart|This paper|8x8|361|5790|3D CNN|  
 ## Datasets  
-Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
+Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, MMPD, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
 |Dataset|Participants|Frames|Lossless|Synchronicity|  
 |:-:|:-:|:-:|:-:|:-:|  
 |RLAP|58|3.53M|MJPG|Good|   
@@ -24,6 +24,7 @@ Adding a dataset is simple, just write a loader and include a index file (usuall
 |PURE|10|106K|YES|Good|  
 |UBFC-rPPG|42|75K|YES|Bad| 
 |UBFC-PHYS|56|1.06M|MJPG|-| 
+|MMPD|33|1.15M|H.264|-|
 |SCAMPS|2800|1.68M|Synthetics|Good|  
 
 
@@ -307,6 +308,9 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 </form>
 
 ### Cross-dataset testing on MMPD-Simplest  
+
+Referencing https://github.com/McJackTang/MMPD_rPPG_dataset, we tested all models in the simplest scenario. MMPD is a highly compressed dataset using H.264 encoding, which may affect some compression-sensitive models. In the simplest scenario, it only contains light skin samples and no head movement.  
+The simplest scenario is as follows: `motion='Stationary', skin_color='3', light=['LED-high', 'LED-low', 'Incandescent']`
 |Model|MAE|RMSE|Pearson Coef.|   
 |:-:|:-:|:-:|:-:|  
 |DeepPhys|1.03|1.46|0.987|  
