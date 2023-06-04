@@ -19,6 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 from scipy.signal import welch, butter, lfilter
 from scipy.sparse import spdiags
+import scipy.io
 
 def get_hr(y, sr=30, min=30, max=180):
     p, q = welch(y, sr, nfft=1e5/sr, nperseg=np.min((len(y)-1, 256)))
@@ -106,6 +107,19 @@ class Loader:
 
     def __init__(self, base) -> None:
         self.base = base
+
+class LoaderMMPD(Loader):
+
+    def __call__(self, vid):
+        path = f"{self.base}{vid}"
+        f = scipy.io.loadmat(path)
+        bvp = f['GT_ppg'][0]
+        ts = np.arange(bvp.shape[0])/30 # 30fps
+        vid = (f['video']*255).astype(np.uint8)
+        # Load the entire video file directly, with slightly higher memory usage.
+        return vid, bvp, ts
+    
+loader_mmpd = LoaderMMPD(dataset_mmpd)
 
 class LoaderUBFCrPPG2(Loader):
 
@@ -383,7 +397,9 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
     
     def selector_(s):
         for k, v in kw.items():
-            if k in i.attrs and v != i.attrs[k]:
+            if isinstance(v, str):
+                v = [v]
+            if k in s and str(s[k]) not in v:
                 return False
         return selector(s)
     print(f'Generating datatape {datatape} .....')
@@ -576,7 +592,9 @@ def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selecto
     global r, r_m
     def selector_(s):
         for k, v in kw.items():
-            if k in s and v != s[k]:
+            if isinstance(v, str):
+                v = [v]
+            if k in s and str(s[k]) not in v:
                 return False
         return selector(s)
     r, r_m = [], []
@@ -601,7 +619,9 @@ def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selecto
 def get_metrics_HRV(result='result.h5', use_filter=True, selector=lambda s:True, **kw):
     def selector_(s):
         for k, v in kw.items():
-            if k in s and v != s[k]:
+            if isinstance(v, str):
+                v = [v]
+            if k in s and str(s[k]) not in v:
                 return False
         return selector(s)
     SDNN = []
