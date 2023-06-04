@@ -589,7 +589,6 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
 mae, rmse, R = lambda r:np.mean([abs(i[0]-i[1]) for i in r]), lambda r:np.mean([(i[0]-i[1])**2 for i in r])**0.5, lambda r:np.corrcoef(np.array(r).T)[0, 1]
 
 def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selector=lambda s:True, **kw):
-    global r, r_m
     def selector_(s):
         for k, v in kw.items():
             if isinstance(v, str):
