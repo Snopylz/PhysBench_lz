@@ -40,7 +40,7 @@ By default, it uses a pre-trained Seq-rPPG model on RLAP.
 
 ## Training evaluation on RLAP  
 RLAP is an appropriate training set, and we divide RLAP into training ,validation and testing set. In addition, tests were also conducted on the entire UBFC and PURE datasets. For code and results, please refer to `benchmark_RLAP`.  
-The testing on the RLAP and RLAP-rPPG dataset is different from other datasets. Due to the longer duration of RLAP dataset videos, a 30s moving window is used instead of the entire video for heart rate prediction. For other datasets, a 1min entire video is used for heart rate prediction.
+The testing on the RLAP and RLAP-rPPG dataset is different from other datasets. Due to the longer duration of RLAP dataset videos, a 30s moving window is used instead of the entire video for heart rate prediction. For other datasets, the entire 1min video is used for heart rate prediction.
 ### Intra-dataset testing on RLAP  
 |Model|MAE|RMSE|Pearson Coef.|   
 |:-:|:-:|:-:|:-:|  
