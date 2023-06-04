@@ -306,6 +306,18 @@ RLAP is an appropriate training set, and we divide RLAP into training ,validatio
 </tbody></table>
 </form>
 
+### Cross-dataset testing on MMPD-Simplest  
+|Model|MAE|RMSE|Pearson Coef.|   
+|:-:|:-:|:-:|:-:|  
+|DeepPhys|1.03|1.46|0.987|  
+|TS-CAN|0.95|1.40|0.989|  
+|EfficientPhys|1.57|5.40|0.821|  
+|PhysNet|0.97|1.45|0.988|  
+|PhysFormer|1.70|4.13|0.890|  
+|Seq-rPPG|1.52|3.93|0.915|  
+|NoobHeart|2.78|6.31|0.763|  
+
+
 ## Training evaluation on SCAMPS  
 Training on synthetic datasets is difficult, and we observed that overfitting can easily occur, requiring many steps to prevent overfitting, such as controlling the learning rate, additional regularization operations, etc. We were unable to reproduce the performance of rPPG Toolbox but believe it is reproducible with more parameter tuning. Smaller models may not be prone to overfitting; NoobHeart is an example where we froze the LayerNormalization layer with initial parameters and trained for 5 epochs while achieving similar performance as training on real datasets. This could be the first step in training on synthetic datasets.  
 
