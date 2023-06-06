@@ -22,7 +22,7 @@ For any model, whether it's Tensorflow, Pytorch, or using Numpy, the input is fa
 The only thing that needs to be done is to encapsulate the algorithm into a function, inputting video frames and outputting BVP signals or heart rate.
 ```python
 def model(frames):
-    # Frames is (Batch, Depth, H, W, C) matrix, only contain one face.
+    # Frames is (Batch, Depth, H, W, C) matrix, only contain the face.
     BVP = algorithm(frames)  
     return BVP # (Batch, Depth)
     
