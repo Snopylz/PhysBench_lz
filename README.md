@@ -15,6 +15,31 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |PhysFormer|CVPR 22|128x128|7.03M|324M|Transformer|  
 |Seq-rPPG|This paper|8x8|196K|261K|1D CNN|  
 |NoobHeart|This paper|8x8|361|5790|3D CNN|  
+
+## Add new models (supervised or unsupervised) 
+
+For any model, whether it's Tensorflow, Pytorch, or using Numpy, the input is facial video clips and the output is corresponding physiological signals.
+The only thing that needs to be done is to encapsulate the algorithm into a function, inputting video frames and outputting BVP signals or heart rate.
+```python
+def model(frames):
+    # Frames is (Batch, Depth, H, W, C) matrix
+    BVP = algorithm(frames)  
+    return BVP # (Batch, Depth)
+    
+# Evaluate the model on the HDF5 standard dataset  
+eval_on_dataset('test_set.h5', model, depth, (H, W), save='result.h5')
+
+# Obtain HR metrics
+hr_metrics = get_metrics('result.h5')
+
+# Obtain HRV metrics
+hrv_metrics = get_metrics_HRV('result.h5')
+```
+Open the visualization webpage, where you can find result.h5 and view the waveform of each video.  
+```
+
+```
+
 ## Datasets  
 Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, MMPD, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
 |Dataset|Participants|Frames|Lossless|Synchronicity|  
