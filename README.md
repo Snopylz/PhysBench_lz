@@ -27,17 +27,17 @@ def model(frames):
     return BVP # (Batch, Depth)
     
 # Evaluate the model on the HDF5 standard dataset  
-eval_on_dataset('test_set.h5', model, depth, (H, W), save='result.h5')
+eval_on_dataset('test_set.h5', model, depth, (H, W), save='results/my_result.h5')
 
 # Obtain HR metrics
-hr_metrics = get_metrics('result.h5')
+hr_metrics = get_metrics('results/my_result.h5')
 
 # Obtain HRV metrics
-hrv_metrics = get_metrics_HRV('result.h5')
+hrv_metrics = get_metrics_HRV('results/my_result.h5')
 ```
 Open the visualization webpage, where you can find result.h5 and view the waveform of each video.  
 ```
-
+python visualization.py
 ```
 
 ## Datasets  
