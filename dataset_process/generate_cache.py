@@ -18,6 +18,9 @@ files_ubfc_rppg2 = df['file']
 df = pd.read_csv('../datasets/SCAMPS_dataset_index.csv')
 files_scamps = df['file']
 
+df = pd.read_csv('../datasets/UBFC_PHYS_dataset_index.csv')
+files_ubfc_phys = df['file']
+
 def log(s):
     with open('cache_log.txt', 'a') as f:
         f.write(s+'\n')
@@ -47,9 +50,14 @@ def cache_scamps(f):
     vid, bvp, ts = loader_scamps(f)
     cache(loader_scamps.base+f, vid)
 
+def cache_ubfc_phys(f):
+    vid, bvp, ts = loader_ubfc_phys(f)
+    cache(loader_ubfc_phys.base+f, vid)
+
 if __name__ == '__main__':
     with Pool(cores) as p:
         #p.map(cache_ccnu, files_ccnu)
         #p.map(cache_pure, files_pure)
         #p.map(cache_ubfc_rppg2, files_ubfc_rppg2)
-        p.map(cache_scamps, files_scamps)
+        #p.map(cache_scamps, files_scamps)
+        p.map(cache_ubfc_phys, files_ubfc_phys)
