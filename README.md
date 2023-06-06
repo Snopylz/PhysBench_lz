@@ -35,7 +35,7 @@ hr_metrics = get_metrics('results/my_result.h5')
 # Obtain HRV metrics
 hrv_metrics = get_metrics_HRV('results/my_result.h5')
 ```
-Open the visualization webpage, where you can find result.h5 and view the waveform of each video.  
+Open the visualization webpage, where you can find my_result.h5 and view the waveform of each video.  
 ```
 python visualization.py
 ```
@@ -54,6 +54,28 @@ Adding a dataset is simple, just write a loader and include a index file (usuall
 
 
 **Note: Our framework implemented UBFC-PHYS, but due to the large motion amplitude, there is a lot of noise in its Ground Truth, and the test results may not be reliable, so they are not listed. Further measures may need to be taken to filter out inaccurate Ground Truth signals before the results can be released.**
+
+## Add new datasets  
+
+To add a new dataset, two things need to be prepared: adding a Loader and organizing a file index.  
+Taking MMPD as an example:
+```python
+class LoaderMMPD(Loader):
+
+    def __call__(self, vid):                        # vid is the relative path of the video file.
+        path = f"{self.base}{vid}"                  # Obtain the absolute path
+        f = scipy.io.loadmat(path)                  
+        bvp = f['GT_ppg'][0]                        # (Depth, )
+        ts = np.arange(bvp.shape[0])/30 # 30fps     # (Depth, )
+        vid = (f['video']*255).astype(np.uint8)     # (Depth, H, W, C)
+        return vid, bvp, ts                         # Return video frame, BVP, timestamps
+        
+loader_mmpd = LoaderMMPD(mmpd_root) # Use the MMPD dataset root directory to initialize the loader.
+
+# Use Loader to package the MMPD raw dataset into a HDF5 standard dataset, witch can be used for testing models.
+dump_dataset("mmpd_dataset.h5", files_mmpd, loader_mmpd, labels=labels_list)
+```
+
 ## Train and Test
 Train on our RLAP dataset, please see the `benchmark_RLAP` folder. Train on the SCAMPS dataset, please see the `benchmark_SCAMPS` folder. In addition, for ablation experiments and training on PURE and UBFC, please see `benchmark_addition`. All code is provided in Jupyter notebooks with our replication included; if you have read the tutorial, replicating results should be easy.   
 
