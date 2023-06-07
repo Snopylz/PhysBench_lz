@@ -8,11 +8,11 @@ We implemented 7 neural models and 3 unsupervised models, DeepPhys, TS-CAN, Effi
 For unsupervised methods, please refer to `unsupervised_methods.py`; for methods implemented using TensorFlow, please refer to `models.py`; for methods implemented using PyTorch, please refer to `models_torch.py`. Our framework is not dependent on a specific deep learning framework. Please configure the environment as needed and install the required packages using `requirements.txt`.
 |Model|Publication|Resolution|Params|Frame FLOPs|Type|  
 |:-:|:-:|:-:|:-:|:-:|---|  
-|DeepPhys|ECCV 19|36x36|532K|52M|2D CNN|  
-|TS-CAN|NIPS 20|36x36|532K|52M|2D CNN|  
-|EfficientPhys|WACV 23|72x72|2.16M|230M|2D CNN| 
-|PhysNet|BMVC 19|32x32|770K|54M|3D CNN|  
-|PhysFormer|CVPR 22|128x128|7.03M|324M|Transformer|  
+|DeepPhys|[ECCV 18](https://openaccess.thecvf.com/content_ECCV_2018/papers/Weixuan_Chen_DeepPhys_Video-Based_Physiological_ECCV_2018_paper.pdf)|36x36|532K|52M|2D CNN|  
+|TS-CAN|[NIPS 20](https://papers.nips.cc/paper/2020/file/e1228be46de6a0234ac22ded31417bc7-Paper.pdf)|36x36|532K|52M|2D CNN|  
+|EfficientPhys|[WACV 23](https://openaccess.thecvf.com/content/WACV2023/papers/Liu_EfficientPhys_Enabling_Simple_Fast_and_Accurate_Camera-Based_Cardiac_Measurement_WACV_2023_paper.pdf)|72x72|2.16M|230M|2D CNN| 
+|PhysNet|[BMVC 19](https://bmvc2019.org/wp-content/uploads/papers/0186-paper.pdf)|32x32|770K|54M|3D CNN|  
+|PhysFormer|[CVPR 22](https://openaccess.thecvf.com/content/CVPR2022/papers/Yu_PhysFormer_Facial_Video-Based_Physiological_Measurement_With_Temporal_Difference_Transformer_CVPR_2022_paper.pdf)|128x128|7.03M|324M|Transformer|  
 |Seq-rPPG|This paper|8x8|196K|261K|1D CNN|  
 |NoobHeart|This paper|8x8|361|5790|3D CNN|  
 
