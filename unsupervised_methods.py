@@ -1,6 +1,6 @@
 import numpy as np
 import scipy, math
-from models import detrend
+from utils import detrend
 
 def CHROM(RGB):
     Xcomp, Ycomp = (np.array([[3 ,  -2 , 0],
@@ -145,7 +145,7 @@ def ica(X, Nsources, Wprev=0):
     return W, Zhat
 
 def ICA(RGB, FS=30):
-
+    RGB = (RGB-RGB.mean())/RGB.std(axis=0)
     NyquistF = 1 / 2 * FS
     BGRNorm = np.zeros(RGB.shape)
     for c in range(3):
