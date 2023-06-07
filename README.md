@@ -117,6 +117,9 @@ The testing on the RLAP and RLAP-rPPG dataset is different from other datasets. 
 |PhysFormer|1.56|6.28|0.803|  
 |Seq-rPPG|1.07|4.15|0.917|  
 |NoobHeart|1.79|5.85|0.832|  
+|Chrom|6.90|16.0|0.341|  
+|ICA|6.05|13.3|0.380|  
+|POS|4.25|12.1|0.501|  
 
 ### Intra-dataset testing on RLAP-rPPG  
 <form action="" method="post" name="form1" class="form" id="form1">
@@ -200,10 +203,40 @@ The testing on the RLAP and RLAP-rPPG dataset is different from other datasets. 
 <td rowspan="1" colspan="1">57.3</td>
 <td rowspan="1" colspan="1">0.488</td>
 </tr>
+<tr>
+<td rowspan="1" colspan="1">Chrom</td>
+<td rowspan="1" colspan="1">5.88</td>
+<td rowspan="1" colspan="1">14.1</td>
+<td rowspan="1" colspan="1">0.451</td>
+<td rowspan="1" colspan="1">63.7</td>
+<td rowspan="1" colspan="1">69.8</td>
+<td rowspan="1" colspan="1">0.267</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">ICA</td>
+<td rowspan="1" colspan="1">4.56</td>
+<td rowspan="1" colspan="1">9.91</td>
+<td rowspan="1" colspan="1">0.569</td>
+<td rowspan="1" colspan="1">74.7</td>
+<td rowspan="1" colspan="1">77.7</td>
+<td rowspan="1" colspan="1">0.408</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">POS</td>
+<td rowspan="1" colspan="1">3.60</td>
+<td rowspan="1" colspan="1">10.1</td>
+<td rowspan="1" colspan="1">0.634</td>
+<td rowspan="1" colspan="1">70.6</td>
+<td rowspan="1" colspan="1">75.8</td>
+<td rowspan="1" colspan="1">0.267</td>
+</tr>
 </tbody></table>
 </form>
 
 ### Cross-dataset testing on UBFC-rPPG  
+
+The videos and physiological signals of UBFC-rPPG are not strictly synchronized, which results in a fixed error between the heart rate extracted by the rPPG algorithm and GT. Therefore, the error limit of UBFC-rPPG is approximately Pearson's coefficient 0.997, and further improvement in model accuracy will not yield better metrics.
+
 <form action="" method="post" name="form1" class="form" id="form1">
 <table width="100%" cellpadding="0" cellspacing="0">
 <thead>
@@ -285,10 +318,39 @@ The testing on the RLAP and RLAP-rPPG dataset is different from other datasets. 
 <td rowspan="1" colspan="1">36.5</td>
 <td rowspan="1" colspan="1">0.697</td>
 </tr>
+<tr>
+<td rowspan="1" colspan="1">Chrom</td>
+<td rowspan="1" colspan="1">3.82</td>
+<td rowspan="1" colspan="1">12.3</td>
+<td rowspan="1" colspan="1">0.830</td>
+<td rowspan="1" colspan="1">23.7</td>
+<td rowspan="1" colspan="1">28.6</td>
+<td rowspan="1" colspan="1">0.672</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">ICA</td>
+<td rowspan="1" colspan="1">1.58</td>
+<td rowspan="1" colspan="1">2.55</td>
+<td rowspan="1" colspan="1">0.990</td>
+<td rowspan="1" colspan="1">33.3</td>
+<td rowspan="1" colspan="1">42.0</td>
+<td rowspan="1" colspan="1">0.604</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">POS</td>
+<td rowspan="1" colspan="1">2.45</td>
+<td rowspan="1" colspan="1">8.56</td>
+<td rowspan="1" colspan="1">0.900</td>
+<td rowspan="1" colspan="1">30.5</td>
+<td rowspan="1" colspan="1">37.6</td>
+<td rowspan="1" colspan="1">0.513</td>
+</tr>
 </tbody></table>
 </form>
 
 ### Cross-dataset testing on PURE  
+
+Unsupervised methods are usually sensitive to preprocessing and postprocessing, and many parameters affect their performance. PhysBench optimizes these additional steps as much as possible to fully demonstrate the model's performance. Surprisingly, POS outperforms most supervised methods on the PURE dataset, and after careful verification, the results are genuine.
 <form action="" method="post" name="form1" class="form" id="form1">
 <table width="100%" cellpadding="0" cellspacing="0">
 <thead>
@@ -370,6 +432,33 @@ The testing on the RLAP and RLAP-rPPG dataset is different from other datasets. 
 <td rowspan="1" colspan="1">58.1</td>
 <td rowspan="1" colspan="1">0.657</td>
 </tr>
+<tr>
+<td rowspan="1" colspan="1">Chrom</td>
+<td rowspan="1" colspan="1">2.08</td>
+<td rowspan="1" colspan="1">12.3</td>
+<td rowspan="1" colspan="1">0.856</td>
+<td rowspan="1" colspan="1">40.4</td>
+<td rowspan="1" colspan="1">56.2</td>
+<td rowspan="1" colspan="1">0.418</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">ICA</td>
+<td rowspan="1" colspan="1">1.12</td>
+<td rowspan="1" colspan="1">3.97</td>
+<td rowspan="1" colspan="1">0.986</td>
+<td rowspan="1" colspan="1">67.5</td>
+<td rowspan="1" colspan="1">76.5</td>
+<td rowspan="1" colspan="1">0.376</td>
+</tr>
+<tr>
+<td rowspan="1" colspan="1">POS</td>
+<td rowspan="1" colspan="1">0.39</td>
+<td rowspan="1" colspan="1">0.66</td>
+<td rowspan="1" colspan="1">1.000</td>
+<td rowspan="1" colspan="1">56.1</td>
+<td rowspan="1" colspan="1">69.2</td>
+<td rowspan="1" colspan="1">0.467</td>
+</tr>
 </tbody></table>
 </form>
 
@@ -386,6 +475,9 @@ The simplest scenario is as follows: `motion='Stationary', skin_color='3', light
 |PhysFormer|1.70|4.13|0.890|  
 |Seq-rPPG|1.52|3.93|0.915|  
 |NoobHeart|2.78|6.31|0.763|  
+|Chrom|12.2|19.2|0.151|  
+|ICA|4.08|9.45|0.642|  
+|POS|4.30|10.8|0.426|  
 
 
 ## Training evaluation on SCAMPS  
