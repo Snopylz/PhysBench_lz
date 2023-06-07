@@ -48,12 +48,26 @@ Adding a dataset is simple, just write a loader and include a index file (usuall
 |RLAP-rPPG|58|781K|YES|Good|  
 |PURE|10|106K|YES|Good|  
 |UBFC-rPPG|42|75K|YES|Bad| 
-|UBFC-PHYS|56|1.06M|MJPG|-| 
+|UBFC-Phys|56|1.06M|MJPG|-| 
 |MMPD|33|1.15M|H.264|-|
 |SCAMPS|2800|1.68M|Synthetics|Good|  
 
+* PURE  
+Stricker, R., Müller, S., Gross, H.-M.Non-contact "Video-based Pulse Rate Measurement on a Mobile Service Robot" in: Proc. 23st IEEE Int. Symposium on Robot and Human Interactive Communication (Ro-Man 2014), Edinburgh, Scotland, UK, pp. 1056 - 1062, IEEE 2014
 
-**Note: Our framework implemented UBFC-PHYS, but due to the large motion amplitude, there is a lot of noise in its Ground Truth, and the test results may not be reliable, so they are not listed. Further measures may need to be taken to filter out inaccurate Ground Truth signals before the results can be released.**
+* UBFC-rPPG
+S. Bobbia, R. Macwan, Y. Benezeth, A. Mansouri, J. Dubois, "Unsupervised skin tissue segmentation for remote photoplethysmography", Pattern Recognition Letters, 2017.
+
+* UBFC-Phys
+Sabour, R. M., Benezeth, Y., De Oliveira, P., Chappe, J., & Yang, F. (2021). Ubfc-phys: A multimodal database for psychophysiological studies of social stress. IEEE Transactions on Affective Computing.
+
+* MMPD  
+Jiankai Tang, Kequan Chen, Yuntao Wang, Yuanchun Shi, Shwetak Patel, Daniel McDuff, Xin Liu, "MMPD: Multi-Domain Mobile Video Physiology Dataset", IEEE EMBC, 2023
+
+* SCAMPS  
+D. McDuff, M. Wander, X. Liu, B. Hill, J. Hernandez, J. Lester, T. Baltrusaitis, "SCAMPS: Synthetics for Camera Measurement of Physiological Signals", NeurIPS, 2022
+
+**Note: Our framework implemented UBFC-Phys, but due to the large motion amplitude, there is a lot of noise in its Ground Truth, and the test results may not be reliable, so they are not listed. Further measures may need to be taken to filter out inaccurate Ground Truth signals before the results can be released.**
 
 ## Add new datasets  
 
