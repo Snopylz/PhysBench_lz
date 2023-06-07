@@ -15,6 +15,9 @@ For unsupervised methods, please refer to `unsupervised_methods.py`; for methods
 |PhysFormer|[CVPR 22](https://openaccess.thecvf.com/content/CVPR2022/papers/Yu_PhysFormer_Facial_Video-Based_Physiological_Measurement_With_Temporal_Difference_Transformer_CVPR_2022_paper.pdf)|128x128|7.03M|324M|Transformer|  
 |Seq-rPPG|This paper|8x8|196K|261K|1D CNN|  
 |NoobHeart|This paper|8x8|361|5790|3D CNN|  
+|Chrom|[TBME 13](https://ieeexplore.ieee.org/document/6523142)|-|-|-|Unsupervised|  
+|POS|[TBME 16](https://ieeexplore.ieee.org/document/7565547)|-|-|-|Unsupervised|  
+|ICA|[TBME 11](https://affect.media.mit.edu/pdfs/11.Poh-etal-TBME.pdf)|-|-|-|Unsupervised|  
 
 ## Add new models (supervised or unsupervised) 
 
