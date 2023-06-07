@@ -45,7 +45,7 @@ python visualization.py
 
 ## Datasets  
 Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, MMPD, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.  
-We recommend training on datasets with Good Synchronicity, as most models are highly sensitive to the synchronicity of the training set. Moreover, not all videos in UBFC-rPPG are unsynchronized; based on experience, some models with a Temporal Shift Module (TSM) can adapt to it, such as TS-CAN and EfficientPhys, but their performance is still inferior compared to training on highly synchronized datasets.  
+It's recommended to train on datasets with Good Synchronicity, as most models are highly sensitive to the synchronicity of the training set. Moreover, not all videos in UBFC-rPPG are unsynchronized; based on experience, some models with a Temporal Shift Module (TSM) can adapt to it, such as TS-CAN and EfficientPhys, but their performance is still inferior compared to training on highly synchronized datasets.  
 |Dataset|Participants|Frames|Lossless|Synchronicity|  
 |:-:|:-:|:-:|:-:|:-:|  
 |RLAP|58|3.53M|MJPG|Good|   
