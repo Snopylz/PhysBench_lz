@@ -44,7 +44,8 @@ python visualization.py
 ```
 
 ## Datasets  
-Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, MMPD, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.
+Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, MMPD, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.  
+We recommend training on datasets with Good Synchronicity, as most models are highly sensitive to the synchronicity of the training set. Moreover, not all videos in UBFC-rPPG are unsynchronized; based on experience, some models with a Temporal Shift Module (TSM) can adapt to it, such as TS-CAN and EfficientPhys, but their performance is still inferior compared to training on highly synchronized datasets.  
 |Dataset|Participants|Frames|Lossless|Synchronicity|  
 |:-:|:-:|:-:|:-:|:-:|  
 |RLAP|58|3.53M|MJPG|Good|   
@@ -54,6 +55,8 @@ Adding a dataset is simple, just write a loader and include a index file (usuall
 |UBFC-Phys|56|1.06M|MJPG|-| 
 |MMPD|33|1.15M|H.264|-|
 |SCAMPS|2800|1.68M|Synthetics|Good|  
+
+You need to organize an index file for each dataset, and PhysBench provides the official versions of these files. Usually, you don't need to change the folder structure of the datasets to use them. Please check the csv files in the `datasets` folder.
 
 * PURE  
 Stricker, R., Müller, S., Gross, H.-M.Non-contact "Video-based Pulse Rate Measurement on a Mobile Service Robot" in: Proc. 23st IEEE Int. Symposium on Robot and Human Interactive Communication (Ro-Man 2014), Edinburgh, Scotland, UK, pp. 1056 - 1062, IEEE 2014
