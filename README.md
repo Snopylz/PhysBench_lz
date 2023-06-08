@@ -501,7 +501,7 @@ COHFACE is a dataset using MPEG-4 compression with a very high compression ratio
 |Seq-rPPG|16.1|25.7|-0.12|  
 |NoobHeart|25.0|29.5|-0.36|  
 |Chrom|27.4|32.4|-0.32|  
-|ICA|7.91|16.1|0.28|  
+|ICA|7.91|16.1|0.282|  
 |POS|22.3|29.9|-0.32|  
 
 ## Training evaluation on SCAMPS  
