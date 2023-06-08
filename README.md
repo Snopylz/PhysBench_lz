@@ -1,6 +1,15 @@
 # PhysBench 
 ### Please use the [Tutorial/Noob Heart.ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart.ipynb) to learn about this framework.
 ![image](https://github.com/KegangWangCCNU/PICS/blob/main/PhysBench.gif)  
+
+## Inference on a single video  
+To extract BVP signals from your own collected video, please execute the following code.  
+```
+python inference.py --video face.avi --out BVP.csv 
+```  
+Its output `BVP.csv` contains the BVP signal values corresponding to each frame.   
+By default, it uses a pre-trained Seq-rPPG model on RLAP.
+
 ## Models  
 
 We implemented 7 neural models and 3 unsupervised models, DeepPhys, TS-CAN, EfficientPhys, PhysNet, PhysFormer, 1D CNN, NoobHeart, Chrom, ICA, and POS. Among them, the Seq-rPPG is a new model we proposed that uses only one-dimensional convolution with minimal computational complexity and high performance. NoobHeart is a toy model used in the tutorial with only 361 parameters and includes a simple 2 layers 3-dimensional convolution structure; however it has decent performance making it suitable as an entry-level model. Chrom，ICA，and POS are three unsupervised models. Among the neural models，PhysFormer is implemented using Pytorch while others use Tensorflow.  
@@ -98,14 +107,6 @@ dump_dataset("mmpd_dataset.h5", files_mmpd, loader_mmpd, labels=labels_list)
 
 ## Train and Test
 Train on our RLAP dataset, please see the `benchmark_RLAP` folder. Train on the SCAMPS dataset, please see the `benchmark_SCAMPS` folder. In addition, for ablation experiments and training on PURE and UBFC, please see `benchmark_addition`. All code is provided in Jupyter notebooks with our replication included; if you have read the tutorial, replicating results should be easy.   
-
-## Inference on a single video  
-To extract BVP signals from your own collected video, please execute the following code.  
-```
-python inference.py --video face.avi --out BVP.csv 
-```  
-Its output `BVP.csv` contains the BVP signal values corresponding to each frame.   
-By default, it uses a pre-trained Seq-rPPG model on RLAP.
 
 ## Training evaluation on RLAP  
 RLAP is an appropriate training set, and we divide RLAP into training ,validation and testing set. In addition, tests were also conducted on the entire UBFC and PURE datasets. For code and results, please refer to `benchmark_RLAP`.  
