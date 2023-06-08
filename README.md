@@ -53,7 +53,7 @@ python visualization.py
 ```
 
 ## Datasets  
-Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, MMPD, PURE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.  
+Adding a dataset is simple, just write a loader and include a index file (usually only 20 lines of code). Currently supported loaders are RLAP (i.e., CCNU), UBFC-rPPG2, UBFC-PHYS, MMPD, PURE, COHFACE, and SCAMPS. You can use our recording program PhysRecorder https://github.com/KegangWangCCNU/PhysRecorder to record datasets, just need a webcam and Contec CMS50E to collect strictly synchronized lossless format datasets, which can be directly used with the RLAP loader.  
 It's recommended to train on datasets with Good Synchronicity, as most models are highly sensitive to the synchronicity of the training set. Moreover, not all videos in UBFC-rPPG are unsynchronized; based on experience, some models with a Temporal Shift Module (TSM) can adapt to it, such as TS-CAN and EfficientPhys, but their performance is still inferior compared to training on highly synchronized datasets.  
 |Dataset|Participants|Frames|Lossless|Synchronicity|  
 |:-:|:-:|:-:|:-:|:-:|  
@@ -63,6 +63,7 @@ It's recommended to train on datasets with Good Synchronicity, as most models ar
 |UBFC-rPPG|42|75K|YES|Bad| 
 |UBFC-Phys|56|1.06M|MJPG|-| 
 |MMPD|33|1.15M|H.264|-|
+|COHFACE|40|192K|MPEG-4|Good|  
 |SCAMPS|2800|1.68M|Synthetics|Good|  
 
 You need to organize an index file for each dataset, and PhysBench provides the official versions of these files. Usually, you don't need to change the folder structure of the datasets to use them. Please check the csv files in the `datasets` folder.
@@ -77,7 +78,10 @@ S. Bobbia, R. Macwan, Y. Benezeth, A. Mansouri, J. Dubois, "Unsupervised skin ti
 Sabour, R. M., Benezeth, Y., De Oliveira, P., Chappe, J., & Yang, F. (2021). Ubfc-phys: A multimodal database for psychophysiological studies of social stress. IEEE Transactions on Affective Computing.
 
 * MMPD  
-Jiankai Tang, Kequan Chen, Yuntao Wang, Yuanchun Shi, Shwetak Patel, Daniel McDuff, Xin Liu, "MMPD: Multi-Domain Mobile Video Physiology Dataset", IEEE EMBC, 2023
+Jiankai Tang, Kequan Chen, Yuntao Wang, Yuanchun Shi, Shwetak Patel, Daniel McDuff, Xin Liu, "MMPD: Multi-Domain Mobile Video Physiology Dataset", IEEE EMBC, 2023  
+
+* COHFACE  
+Guillaume Heusch, André Anjos, Sébastien Marcel, “A reproducible study on remote heart rate measurement”, arXiv, 2016.  
 
 * SCAMPS  
 D. McDuff, M. Wander, X. Liu, B. Hill, J. Hernandez, J. Lester, T. Baltrusaitis, "SCAMPS: Synthetics for Camera Measurement of Physiological Signals", NeurIPS, 2022
@@ -483,6 +487,22 @@ The simplest scenario is as follows: `motion='Stationary', skin_color='3', light
 |ICA|4.08|9.45|0.642|  
 |POS|4.30|10.8|0.426|  
 
+### Cross-dataset testing on COHFACE  
+
+COHFACE is a dataset using MPEG-4 compression with a very high compression ratio, and the size of each video does not exceed 2MB, which causes most rPPG algorithms to fail on it. However, some structures show robustness to high compression ratios: such as DeepPhys-like structures that input the difference between video frames and output the difference in BVP. In addition, other poorly performing algorithms are not completely without performance; due to the failure of predicting some videos, this part of the error is actually meaningless and more appropriate metrics should be found to measure performance.
+
+|Model|MAE|RMSE|Pearson Coef.|   
+|:-:|:-:|:-:|:-:|  
+|DeepPhys|2.75|8.63|0.733|  
+|TS-CAN|2.28|7.81|0.774|  
+|EfficientPhys|3.94|12.0|0.528|  
+|PhysNet|19.6|26.9|-0.45|  
+|PhysFormer|20.0|26.1|-0.37|  
+|Seq-rPPG|16.1|25.7|-0.12|  
+|NoobHeart|25.0|29.5|-0.36|  
+|Chrom|27.4|32.4|-0.32|  
+|ICA|7.91|16.1|0.28|  
+|POS|22.3|29.9|-0.32|  
 
 ## Training evaluation on SCAMPS  
 Training on synthetic datasets is difficult, and we observed that overfitting can easily occur, requiring many steps to prevent overfitting, such as controlling the learning rate, additional regularization operations, etc. We were unable to reproduce the performance of rPPG Toolbox but believe it is reproducible with more parameter tuning. Smaller models may not be prone to overfitting; NoobHeart is an example where we froze the LayerNormalization layer with initial parameters and trained for 5 epochs while achieving similar performance as training on real datasets. This could be the first step in training on synthetic datasets.  
