@@ -20,6 +20,9 @@ import threading
 from scipy.signal import welch, butter, lfilter
 from scipy.sparse import spdiags
 import scipy.io
+from scipy.signal import hilbert
+import matplotlib.pyplot as plt
+
 
 def get_hr(y, sr=30, min=30, max=180):
     p, q = welch(y, sr, nfft=1e5/sr, nperseg=np.min((len(y)-1, 256)))
@@ -57,7 +60,7 @@ def detrend(signal, Lambda=25):
             rst[i:] = _detrend(signal[-900:])[-(rst.shape[0]-i):]
     return rst
 
-def bandpass_filter(data, lowcut=0.6, highcut=2.5, fs=30, order=2):
+def bandpass_filter(data, lowcut=0.5, highcut=3, fs=30, order=2):
     b, a = butter(order, [lowcut, highcut], fs=fs, btype='band')
     return lfilter(b, a, data)
 
@@ -107,6 +110,37 @@ class Loader:
 
     def __init__(self, base) -> None:
         self.base = base
+
+class LoaderCOHFACE(Loader):
+
+    def __call__(self, vid):
+        path = f'{self.base}{vid}'
+        lb = path[:-4]+'.hdf5'
+        with h5py.File(lb, 'r') as f:
+            bvp = f['pulse'][:]
+            rr = f['respiration'][:]
+            ts = f['time'][:]
+            bvp_i = UnivariateSpline(ts, bvp, s=0)
+            rr_i = UnivariateSpline(ts, rr, s=0)
+            _ = cv2.VideoCapture(f"{self.base}{vid}")
+            fps = _.get(cv2.CAP_PROP_FPS)
+            n = _.get(cv2.CAP_PROP_FRAME_COUNT)
+            _.release()
+            ts = np.arange(n)/fps
+            def _1():
+                cap = cv2.VideoCapture(f"{self.base}{vid}")
+                while 1:
+                    _, frame = cap.read()
+                    if _:
+                        yield cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    else:
+                        break
+            class _2:
+                def __iter__(self):
+                    return _1()
+            return _2(), bvp_i(ts), ts, {'rr':rr_i(ts)}
+        
+loader_cohface = LoaderCOHFACE(dataset_cohface)
 
 class LoaderMMPD(Loader):
 
@@ -296,7 +330,12 @@ def generate_vid_labels(vid, detect_per_n=5, bfill=True):
 def load_dataset(files, loader:Loader, threads=8):
     base = loader.base
     def load(f):
-        vid, bvp, ts = loader(f)
+        _ = loader(f)
+        if len(_) == 3:
+            vid, bvp, ts = _
+            ext = {}
+        if len(_) == 4:
+            vid, bvp, ts, ext = _
         """
         Cache the face detection, and if it is already cached, read it directly.
         """
@@ -315,7 +354,7 @@ def load_dataset(files, loader:Loader, threads=8):
             except:
                 os.remove(f'{tmp}/{hash(base+f)}.h5')
                 return load(f)
-        return {'video':vid, 'bvp':bvp, 'timestamp':ts, 'boxes':boxes, 'landmarks': landmarks}
+        return {'video':vid, 'bvp':bvp, 'timestamp':ts, 'boxes':boxes, 'landmarks': landmarks, 'extention':ext}
     with ThreadPoolExecutor(threads) as p:
         for i in p.map(load, files):
             yield i
@@ -336,19 +375,25 @@ def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), thre
     with h5py.File(target, 'w') as f:
         def dump(x):
             i, j = x
-            ts_, bvp_, cap, boxes = list(j['timestamp']), list(j['bvp']), j['video'], np.round(j['boxes'])
+            ts_, bvp_, cap, boxes, ext_ = list(j['timestamp']), list(j['bvp']), j['video'], np.round(j['boxes']), {k:list(v) for k, v in j['extention'].items()}
             ts, frames, bvp = [], [], []
+            ext = {i:[] for i in ext_}
             n = 0
             for frame in map(lambda x:resize(x[0], x[1]), zip(cap, boxes)):
                 if frame is not None:
                     frames.append(frame)
                     bvp.append(bvp_.pop(0))
                     ts.append(ts_.pop(0))
+                    for k in ext:
+                        ext[k].append(ext_[k].pop(0))
                 elif frames:
                     _ = f.create_group(f'{i}_{n}')
                     _.create_dataset('video', data=np.array(frames), compression=compression)
                     _.create_dataset('bvp', data=np.array(bvp), compression=compression)
                     _.create_dataset('timestamp', data=np.array(ts), compression=compression)
+                    for k in ext:
+                        _.create_dataset(k, data=np.array(ext[k]), compression=compression)
+                        ext[k] = []
                     n += 1
                     frames, bvp = [], []
             if not n:
@@ -358,8 +403,10 @@ def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), thre
             _.create_dataset('video', data=np.array(frames), compression=compression)
             _.create_dataset('bvp', data=np.array(bvp), compression=compression)
             _.create_dataset('timestamp', data=np.array(ts), compression=compression)
+            for k in ext:
+                _.create_dataset(k, data=np.array(ext[k]), compression=compression)
         with ThreadPoolExecutor(threads) as p:
-            for i in tqdm.tqdm(p.map(dump, enumerate(load_dataset(files, loader))), total=len(files)):
+            for i in p.map(dump, tqdm.tqdm(enumerate(load_dataset(files, loader)), total=len(files))):
                 pass
         with h5py.File(target, 'r+') as f:
             files = list(files)
@@ -408,6 +455,9 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
         f.create_dataset('bvp', shape=(0, shape[0]), maxshape=(None, shape[0]), compression=compression, dtype=np.float32)
         f.create_dataset('bvp_normalized', shape=(0, shape[0]), maxshape=(None, shape[0]), compression=compression, dtype=np.float32)
         buffers = {'vid':[], 'bvp':[], 'bvp_normalized':[]}
+        ext_buffers = {i:[] for i in _.keys() if i not in ('vid', 'bvp', 'timestamp')}
+        for i in ext_buffers:
+            f.create_dataset(i, shape=(0, shape[0]), maxshape=(None, shape[0]), compression=compression, dtype=np.float32)
         for i in tqdm.tqdm(_.values()):
             if not selector_(i.attrs):
                 continue
@@ -432,15 +482,19 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
                 buffers['vid'].append(frames)
                 buffers['bvp'].append(i['bvp'][n:n+shape[0]])
                 buffers['bvp_normalized'].append(bvp_normalized[n:n+shape[0]])
+                for j in ext_buffers:
+                    ext_buffers[j].append(i[j][n:n+shape[0]])
                 while extend_rate>0 and np.random.rand()<1/(1+1/extend_rate):
                     hr_target = np.log2(1+np.random.rand())*(extend_hr[1]-extend_hr[0])+extend_hr[0]
                     frames_target = round(shape[0]*hr_target/hr)
                     if n+frames_target>all_frames.shape[0]:
                         break
-                    _1, (_2, _3) = resize(all_frames[n:n+frames_target], [i['bvp'][n:n+frames_target], bvp_normalized[n:n+frames_target]], shape[0])
+                    _1, _2 = resize(all_frames[n:n+frames_target], [i['bvp'][n:n+frames_target], bvp_normalized[n:n+frames_target]]+[i[j][n:n+frames_target] for j in ext_buffers], shape[0])
                     buffers['vid'].append(_1)
-                    buffers['bvp'].append(_2)
-                    buffers['bvp_normalized'].append(_3)
+                    buffers['bvp'].append(_2[0])
+                    buffers['bvp_normalized'].append(_2[1])
+                    for j, k in zip(ext_buffers, _2[2:]):
+                        ext_buffers[j].append(k)
                 if len(buffers['vid'])>=buffer:
                     _1, _2, _3 = np.stack(buffers['vid']), np.stack(buffers['bvp']), np.stack(buffers['bvp_normalized'])
                     f['vid'].resize(f['vid'].shape[0]+_1.shape[0], axis=0)
@@ -449,7 +503,12 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
                     f['bvp'][-_2.shape[0]:] = _2
                     f['bvp_normalized'].resize(f['bvp_normalized'].shape[0]+_3.shape[0], axis=0)
                     f['bvp_normalized'][-_3.shape[0]:] = _3
+                    for j, k in ext_buffers.items():
+                        f[j].resize(f[j].shape[0]+k.shape[0], axis=0)
+                        f[j][-k.shape[0]:] = k
                     for _ in buffers.values():
+                        _.clear()
+                    for _ in ext_buffers.values():
                         _.clear()
                 n += round(sr*step)
         if buffers['vid']:
@@ -460,9 +519,12 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
             f['bvp'][-_2.shape[0]:] = _2
             f['bvp_normalized'].resize(f['bvp_normalized'].shape[0]+_3.shape[0], axis=0)
             f['bvp_normalized'][-_3.shape[0]:] = _3
+            for j, k in ext_buffers.items():
+                f[j].resize(f[j].shape[0]+k.shape[0], axis=0)
+                f[j][-k.shape[0]:] = k
         f.create_dataset('index', data=np.random.permutation(f['vid'].shape[0]) if shuffle else np.arange(f['vid'].shape[0]))
 
-def load_datatape(path, shuffle=0, use_normalized_bvp=True, buffer=32, gnoise=0):
+def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buffer=32, gnoise=0):
     with h5py.File(path, 'r') as f:
         if shuffle == 0:
             index = np.arange(f['index'].shape[0])
@@ -471,6 +533,8 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, buffer=32, gnoise=0)
         else:
             index = f['index'][:][np.random.permutation(f['index'].shape[0])]
         shape = f['vid'].shape[1:]
+        if load_ext:
+            ext_keys = [i for i in f.keys() if i not in ('index', 'vid', 'bvp', 'bvp_normalized')]
 
     def async_iter(total, buffer=buffer):
         def _1(g):
@@ -499,18 +563,30 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, buffer=32, gnoise=0)
         def _2():
             with h5py.File(path, 'r') as f:
                 vid, bvp = f['vid'], f['bvp_normalized'] if use_normalized_bvp else f['bvp']
+                if load_ext:
+                    ext = {i:f[i] for i in ext_keys}
                 def _3(i):
                     index_arg = np.argsort(index[i:i+buffer])
                     index_T = np.argsort(index_arg)
                     vid_, bvp_ = vid[index[i:i+buffer][index_arg]][index_T], bvp[index[i:i+buffer][index_arg]][index_T]
+                    if load_ext and ext_keys:
+                        ext_ = {k:v[index[i:i+buffer][index_arg]][index_T] for k, v in ext.items()}
+                        return vid_, bvp_, ext_
                     return vid_, bvp_
                 yield from map(_3, np.arange(0, index.shape[0], buffer))
-        for vid_, bvp_ in _2():
+        for _ in _2():
+            if not load_ext:
+                vid_, bvp_ = _
+            else:
+                vid_, bvp_, ext_ = _
             if vid_.dtype == np.uint8:
                 vid_ = (vid_/255.).astype(np.float16)
             if gnoise>0:
                 vid_ += np.random.normal(size=vid_.shape, scale=gnoise/255)
-            yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i])), range(min(vid_.shape[0], buffer)))
+            if not load_ext:
+                yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i])), range(min(vid_.shape[0], buffer)))
+            else:
+                yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i]), {k:v[i] for k, v in ext_.items()}), range(min(vid_.shape[0], buffer)))
 
     class _:
 
@@ -589,7 +665,6 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
 mae, rmse, R = lambda r:np.mean([abs(i[0]-i[1]) for i in r]), lambda r:np.mean([(i[0]-i[1])**2 for i in r])**0.5, lambda r:np.corrcoef(np.array(r).T)[0, 1]
 
 def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selector=lambda s:True, **kw):
-    global r, r_m
     def selector_(s):
         for k, v in kw.items():
             if isinstance(v, str):
@@ -611,9 +686,11 @@ def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selecto
             fps = 1/(j['timestamp'][1:] - j['timestamp'][:-1]).mean()
             label = j['label'][:]
             predict = j['predict'][:]
-            r_m.append((get_hr(label, sr=fps), predict_hr(bandpass_filter(predict, fs=fps) if use_filter else predict, sr=fps)))
+            if use_filter:
+                predict = bandpass_filter(predict, fs=fps)
+            r_m.append((get_hr(label, sr=fps), predict_hr(predict, sr=fps)))
             for t in np.arange(0, label.shape[0]-(window*fps)//2, step*fps).astype(int):
-                r.append((get_hr(label[t:t+round(window*fps)], sr=fps), predict_hr(bandpass_filter(predict[t:t+round(window*fps)], fs=fps) if use_filter else predict[t:t+round(window*fps)], sr=fps)))
+                r.append((get_hr(label[t:t+round(window*fps)], sr=fps), predict_hr(predict[t:t+round(window*fps)], sr=fps)))
     return {'Sliding window': {'MAE':round(mae(r), 3), 'RMSE':round(rmse(r), 3), 'R':round(R(r), 5)}, 'Whole video': {'MAE':round(mae(r_m), 3), 'RMSE':round(rmse(r_m), 3), 'R':round(R(r_m), 5)}}
 
 def get_metrics_HRV(result='result.h5', use_filter=True, selector=lambda s:True, **kw):
