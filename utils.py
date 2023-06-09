@@ -406,7 +406,7 @@ def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), thre
             for k in ext:
                 _.create_dataset(k, data=np.array(ext[k]), compression=compression)
         with ThreadPoolExecutor(threads) as p:
-            for i in p.map(dump, tqdm.tqdm(enumerate(load_dataset(files, loader)), total=len(files))):
+            for i in p.map(dump, tqdm.tqdm_notebook(enumerate(load_dataset(files, loader)), total=len(files))):
                 pass
         with h5py.File(target, 'r+') as f:
             files = list(files)
@@ -455,10 +455,14 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
         f.create_dataset('bvp', shape=(0, shape[0]), maxshape=(None, shape[0]), compression=compression, dtype=np.float32)
         f.create_dataset('bvp_normalized', shape=(0, shape[0]), maxshape=(None, shape[0]), compression=compression, dtype=np.float32)
         buffers = {'vid':[], 'bvp':[], 'bvp_normalized':[]}
-        ext_buffers = {i:[] for i in _.keys() if i not in ('vid', 'bvp', 'timestamp')}
-        for i in ext_buffers:
-            f.create_dataset(i, shape=(0, shape[0]), maxshape=(None, shape[0]), compression=compression, dtype=np.float32)
-        for i in tqdm.tqdm(_.values()):
+        for __ in _.values():
+            __ = __.keys()
+            break
+        ext_buffers = {i:[] for i in __ if i not in ('video', 'bvp', 'timestamp')}
+        
+        for j in ext_buffers:
+            f.create_dataset(j, shape=(0, shape[0]), maxshape=(None, shape[0]), compression=compression, dtype=np.float32)
+        for i in tqdm.tqdm_notebook(_.values()):
             if not selector_(i.attrs):
                 continue
             ts = i['timestamp'][:]
@@ -504,6 +508,7 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
                     f['bvp_normalized'].resize(f['bvp_normalized'].shape[0]+_3.shape[0], axis=0)
                     f['bvp_normalized'][-_3.shape[0]:] = _3
                     for j, k in ext_buffers.items():
+                        k = np.stack(k)
                         f[j].resize(f[j].shape[0]+k.shape[0], axis=0)
                         f[j][-k.shape[0]:] = k
                     for _ in buffers.values():
@@ -520,6 +525,7 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
             f['bvp_normalized'].resize(f['bvp_normalized'].shape[0]+_3.shape[0], axis=0)
             f['bvp_normalized'][-_3.shape[0]:] = _3
             for j, k in ext_buffers.items():
+                k = np.stack(k)
                 f[j].resize(f[j].shape[0]+k.shape[0], axis=0)
                 f[j][-k.shape[0]:] = k
         f.create_dataset('index', data=np.random.permutation(f['vid'].shape[0]) if shuffle else np.arange(f['vid'].shape[0]))
@@ -611,7 +617,7 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
         fo.attrs['time'] = time.time()
         fo.attrs['dataset'] = os.path.abspath(dataset)
         fo.attrs['output'] = output
-        for i, j in tqdm.tqdm(fi.items()):
+        for i, j in tqdm.tqdm_notebook(fi.items()):
             fps = 1/(j['timestamp'][1:]-j['timestamp'][:-1]).mean()
             try:
                 h = hash((j.attrs['path'], dataset, input_resolution, inspect.getsource(sample)))
