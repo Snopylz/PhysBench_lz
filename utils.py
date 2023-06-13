@@ -23,6 +23,9 @@ import scipy.io
 from scipy.signal import hilbert
 import matplotlib.pyplot as plt
 
+#tqdm = tqdm.tqdm
+tqdm = tqdm.tqdm_notebook
+
 
 def get_hr(y, sr=30, min=30, max=180):
     p, q = welch(y, sr, nfft=1e5/sr, nperseg=np.min((len(y)-1, 256)))
@@ -406,7 +409,7 @@ def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), thre
             for k in ext:
                 _.create_dataset(k, data=np.array(ext[k]), compression=compression)
         with ThreadPoolExecutor(threads) as p:
-            for i in p.map(dump, tqdm.tqdm_notebook(enumerate(load_dataset(files, loader)), total=len(files))):
+            for i in p.map(dump, tqdm(enumerate(load_dataset(files, loader)), total=len(files))):
                 pass
         with h5py.File(target, 'r+') as f:
             files = list(files)
@@ -462,7 +465,7 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
         
         for j in ext_buffers:
             f.create_dataset(j, shape=(0, shape[0]), maxshape=(None, shape[0]), compression=compression, dtype=np.float32)
-        for i in tqdm.tqdm_notebook(_.values()):
+        for i in tqdm(_.values()):
             if not selector_(i.attrs):
                 continue
             ts = i['timestamp'][:]
@@ -530,7 +533,7 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
                 f[j][-k.shape[0]:] = k
         f.create_dataset('index', data=np.random.permutation(f['vid'].shape[0]) if shuffle else np.arange(f['vid'].shape[0]))
 
-def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buffer=32, gnoise=0):
+def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buffer=32, gnoise=0, batch=0, dtype=np.float32):
     with h5py.File(path, 'r') as f:
         if shuffle == 0:
             index = np.arange(f['index'].shape[0])
@@ -574,9 +577,9 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buff
                 def _3(i):
                     index_arg = np.argsort(index[i:i+buffer])
                     index_T = np.argsort(index_arg)
-                    vid_, bvp_ = vid[index[i:i+buffer][index_arg]][index_T], bvp[index[i:i+buffer][index_arg]][index_T]
+                    vid_, bvp_ = vid[index[i:i+buffer][index_arg]][index_T], bvp[index[i:i+buffer][index_arg]][index_T].astype(dtype)
                     if load_ext and ext_keys:
-                        ext_ = {k:v[index[i:i+buffer][index_arg]][index_T] for k, v in ext.items()}
+                        ext_ = {k:v[index[i:i+buffer][index_arg]][index_T].astype(dtype) for k, v in ext.items()}
                         return vid_, bvp_, ext_
                     return vid_, bvp_
                 yield from map(_3, np.arange(0, index.shape[0], buffer))
@@ -586,14 +589,28 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buff
             else:
                 vid_, bvp_, ext_ = _
             if vid_.dtype == np.uint8:
-                vid_ = (vid_/255.).astype(np.float16)
+                vid_ = (vid_/255.).astype(dtype)
+            else:
+                vid_ = vid_.astype(dtype)
             if gnoise>0:
-                vid_ += np.random.normal(size=vid_.shape, scale=gnoise/255)
+                vid_ += np.random.normal(size=vid_.shape, scale=gnoise/255).astype(dtype)
             if not load_ext:
                 yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i])), range(min(vid_.shape[0], buffer)))
             else:
                 yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i]), {k:v[i] for k, v in ext_.items()}), range(min(vid_.shape[0], buffer)))
-
+    
+    def _0(n):
+        def f():
+            t = [], []
+            for i, j in _1():
+                t[0].append(i), t[1].append(j)
+                if len(t[0])==n:
+                    yield np.stack(t[0]), np.stack(t[1])
+                    t[0].clear(), t[1].clear()
+            if len(t[0]):
+                yield np.stack(t[0]), np.stack(t[1])
+        return f()
+    
     class _:
 
         @property
@@ -604,11 +621,21 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buff
             return index.shape[0]
 
         def __iter__(self):
+            if batch:
+                return _0(batch)
             return _1()
         
     return _()
 
-def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', step=1, save='result.h5', batch=4, cumsum=False, sample=cv2.INTER_AREA, ipt_dtype=np.float16):
+def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', step=1, save='result.h5', batch=4, cumsum=False, sample=cv2.INTER_AREA, ipt_dtype=np.float16, selector=lambda s:True, **kw):
+    def selector_(s):
+        for k, v in kw.items():
+            if isinstance(v, str):
+                v = [v]
+            if k in s and str(s[k]) not in v:
+                return False
+        return selector(s)
+    
     if not callable(sample):
         interpolation = sample
         sample = lambda x, y:cv2.resize(x, y, interpolation=interpolation)
@@ -617,7 +644,9 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
         fo.attrs['time'] = time.time()
         fo.attrs['dataset'] = os.path.abspath(dataset)
         fo.attrs['output'] = output
-        for i, j in tqdm.tqdm_notebook(fi.items()):
+        for i, j in tqdm(fi.items()):
+            if not selector_(j.attrs):
+                continue
             fps = 1/(j['timestamp'][1:]-j['timestamp'][:-1]).mean()
             try:
                 h = hash((j.attrs['path'], dataset, input_resolution, inspect.getsource(sample)))
