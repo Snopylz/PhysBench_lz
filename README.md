@@ -1,6 +1,7 @@
 # PhysBench 
-### Please use the [Tutorial/Noob Heart.ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart.ipynb) to learn about this framework.
 ![image](https://github.com/KegangWangCCNU/PICS/blob/main/PhysBench.gif)  
+### Please use the [Tutorial/Noob Heart.ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart.ipynb) to learn about this framework.  
+Although I personally prefer to use TensorFlow, PhysBench is not tied to any specific deep learning framework. For Pytorch and JAX users, please refer to:[Tutorial/Noob Heart (Pytorch).ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart%20(Pytorch).ipynb) and [Tutorial/Noob Heart (JAX).ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart%20(JAX).ipynb)
 
 ## Inference on a single video  
 To extract BVP signals from your own collected video, please execute the following code.  
