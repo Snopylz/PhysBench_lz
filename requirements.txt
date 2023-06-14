@@ -10,4 +10,3 @@ matplotlib
 panel
 pillow
 heartpy
-keras
