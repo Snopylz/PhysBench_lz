@@ -3,12 +3,21 @@
 ### Please use the [Tutorial/Noob Heart.ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart.ipynb) to learn about this framework.  
 Although I personally prefer to use TensorFlow, PhysBench is not tied to any specific deep learning framework. For Pytorch and JAX users, please refer to:[Tutorial/Noob Heart (Pytorch).ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart%20(Pytorch).ipynb) and [Tutorial/Noob Heart (JAX).ipynb](https://github.com/KegangWangCCNU/PhysBench/blob/main/Tutorial/Noob%20Heart%20(JAX).ipynb)
 
-## Environments
+## Environments  
+First, create a new environment for PhysBench.
 ```
 conda create -n physbench python=3.9
 conda activate physbench
-conda install tensorflow=2.6
 pip install -r requirements
+```
+Then, install the deep learning frameworks according to your needs. If you need to install multiple frameworks, it is recommended to create different environments for them.  
+Install TensorFlow environment:
+```
+conda install tensorflow-gpu=2.6 keras=2.6
+```
+Install Pytorch environment:
+```
+conda install pytorch torchvision torchaudio pytorch-cuda -c pytorch -c nvidia
 ```
 ## Inference on a single video  
 To extract BVP signals from your own collected video, please execute the following code.  
@@ -16,7 +25,7 @@ To extract BVP signals from your own collected video, please execute the followi
 python inference.py --video face.avi --out BVP.csv 
 ```  
 Its output `BVP.csv` contains the BVP signal values corresponding to each frame.   
-By default, it uses a pre-trained Seq-rPPG model on RLAP.
+By default, it uses a pre-trained Seq-rPPG model on RLAP using TensorFlow.
 
 ## Models  
 
