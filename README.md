@@ -52,10 +52,11 @@ The only thing that needs to be done is to encapsulate the algorithm into a func
 ```python
 def model(frames):
     # Frames is (Batch, Depth, H, W, C) matrix, only contain the face.
-    BVP = algorithm(frames)  
-    return BVP # (Batch, Depth)
+    input = preprocess(frames) # Preprocessing (if necessary)
+    BVP   = algorithm(input)  
+    return BVP                 # (Batch, Depth)
     
-# Evaluate the model on the HDF5 standard dataset  
+# Evaluate the model on the HDF5 standard dataset
 eval_on_dataset('test_set.h5', model, depth, (H, W), save='results/my_result.h5')
 
 # Obtain HR metrics
