@@ -13,7 +13,8 @@ pip install -r requirements
 Then, install the deep learning frameworks according to your needs. If you need to install multiple frameworks, it is recommended to create different environments for them.  
 Install TensorFlow environment:
 ```
-conda install tensorflow-gpu=2.6 keras=2.6
+conda install cudatoolkit=11.8.0 cudnn=8.9.2.26
+pip install tensorflow==2.10 keras==2.10
 ```
 Install Pytorch environment:
 ```
