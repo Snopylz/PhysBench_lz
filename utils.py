@@ -22,9 +22,10 @@ from scipy.sparse import spdiags
 import scipy.io
 from scipy.signal import hilbert
 import matplotlib.pyplot as plt
+import random
 
-#tqdm = tqdm.tqdm
-tqdm = tqdm.tqdm_notebook
+tqdm = tqdm.tqdm
+#tqdm = tqdm.tqdm_notebook
 
 
 def get_hr(y, sr=30, min=30, max=180):
@@ -637,8 +638,13 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
         return selector(s)
     
     if not callable(sample):
+        sample_h = hash(sample)
         interpolation = sample
         sample = lambda x, y:cv2.resize(x, y, interpolation=interpolation)
+    else:
+        sample_h = inspect.getsource(sample)
+
+
     with h5py.File(dataset, 'r') as fi, h5py.File(save, 'w') as fo:
         fo.attrs['model'] = model.name if hasattr(model, 'name') else ''
         fo.attrs['time'] = time.time()
@@ -648,10 +654,7 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
             if not selector_(j.attrs):
                 continue
             fps = 1/(j['timestamp'][1:]-j['timestamp'][:-1]).mean()
-            try:
-                h = hash((j.attrs['path'], dataset, input_resolution, inspect.getsource(sample)))
-            except:
-                h = hash((j.attrs['path'], dataset, input_resolution, sample))
+            h = hash((j.attrs['path'], dataset, input_resolution, sample_h))
             try:
                 vid = np.load(f'{tmp}/{h}.npy')
             except:

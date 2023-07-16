@@ -1,13 +1,14 @@
 opencv-python==4.5.5.64
 pandas==2.0.3
-numpy==1.20.3
+numpy==1.24
 scipy==1.10.1
 alphashape
 tqdm
-mediapipe==0.10.2
+mediapipe
 h5py
 matplotlib
 panel
 pillow
 heartpy
-protobuf==3.20
+protobuf==3.19.6
+ipykernel
