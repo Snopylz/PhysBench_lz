@@ -524,23 +524,21 @@ COHFACE is a dataset using MPEG-4 compression with a very high compression ratio
 |POS|22.3|29.9|-0.32|  
 
 ## Training evaluation on SCAMPS  
-Training on synthetic datasets is difficult, and we observed that overfitting can easily occur, requiring many steps to prevent overfitting, such as controlling the learning rate, additional regularization operations, etc. We were unable to reproduce the performance of rPPG Toolbox but believe it is reproducible with more parameter tuning. Smaller models may not be prone to overfitting; NoobHeart is an example where we froze the LayerNormalization layer with initial parameters and trained for 5 epochs while achieving similar performance as training on real datasets. This could be the first step in training on synthetic datasets.  
+Training on synthetic datasets is difficult, and we observed that overfitting can easily occur, requiring many steps to prevent overfitting, such as controlling the learning rate, additional regularization operations, etc. Smaller models may not be prone to overfitting; NoobHeart is an example where we froze the LayerNormalization layer with initial parameters and trained for 5 epochs while achieving similar performance as training on real datasets. This could be the first step in training on synthetic datasets.  
 
-For caution, we only display the results of NoobHeart.
+Referencing https://github.com/remotebiosensing/rppg and [rPPG-Toolbox](https://github.com/ubicomplab/rPPG-Toolbox), we use OneCycle learning rate and AdamW optimizer to mitigate overfitting, and train DeepPhys. For details, please refer to https://github.com/KegangWangCCNU/PhysBench/blob/main/benchmark_SCAMPS/DeepPhys.ipynb  
+
 ### Cross-dataset testing on UBFC  
-MAE: 1.05  
-RMSE: 1.49  
-Pearson Coef.: 0.997  
+|Model|MAE|RMSE|Pearson Coef.|   
+|:-:|:-:|:-:|:-:|  
+|DeepPhys|9.51|18.2|0.608|  
+|NoobHeart|1.05|1.49|0.997|  
 
 ### Cross-dataset testing on PURE  
-MAE: 0.53  
-RMSE: 0.88  
-Pearson Coef.: 0.999  
-
-### Cross-dataset testing on MMPD-Simplest  
-MAE: 2.27  
-RMSE: 6.65  
-Pearson Coef.: 0.742  
+|Model|MAE|RMSE|Pearson Coef.|   
+|:-:|:-:|:-:|:-:|  
+|DeepPhys|5.41|13.3|0.852|  
+|NoobHeart|0.53|0.88|0.999|  
 
 ## Visualization  
 Please run `visualization.py` to open the visualization webpage. Before visualizing, make sure all result files are saved in the `results` folder. When the framework generates result files, it links to the dataset files, so the visualization webpage can display face images synchronously. Once the link is invalid, such as when dataset files are moved, faces cannot be displayed on the webpage.  
