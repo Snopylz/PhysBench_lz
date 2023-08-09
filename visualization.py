@@ -86,7 +86,7 @@ def show_panel():
         data['ft'] = app[1][0][0].value
         data['band'] = app[1][0][1].value
         bvp_plot = get_plot(0)
-        app[1][1][0] = pn.pane.Matplotlib(bvp_plot, dpi=288)
+        app[1][1][0] = pn.pane.Matplotlib(bvp_plot, dpi=144)
         #app[1][1][1] = pn.pane.image.PNG(Image.fromarray(data['frames'][0]), width=256, height=256)
         app[1][1][1] = pn.pane.image.PNG(img, width=256, height=256)
     if 't' in data and (data['t'] != app[1][2].value or data['ft']!=app[1][0][0].value or data['band']!=app[1][0][1].value):
@@ -102,7 +102,7 @@ def show_panel():
         else:
             img = Image.fromarray(np.full((128, 128, 3), 255, dtype=np.uint8))
         bvp_plot = get_plot(data['t'])
-        app[1][1][0] = pn.pane.Matplotlib(bvp_plot, dpi=288)
+        app[1][1][0] = pn.pane.Matplotlib(bvp_plot, dpi=144)
         app[1][1][1] = pn.pane.image.PNG(img, width=256, height=256)
         
 
