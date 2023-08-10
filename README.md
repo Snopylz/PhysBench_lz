@@ -546,6 +546,10 @@ Please run `visualization.py` to open the visualization webpage. Before visualiz
 ## Limitation  
 The test data used by PhysBench may not necessarily reflect the accuracy in real-world scenarios, where there are more diverse lighting conditions, head movements, skin tones and age groups. The heart rate provided by the algorithm through Welch method may not fully comply with medical standards and requires further rigorous evaluation before clinical use. We aim to inform users of the weaknesses and limitations of the algorithm as much as possible through the visualization webpage.
 
+## Full Benchmark Table  
+All the results of the experiments we conducted can be found here.  
+[FullBench.pdf](https://github.com/fc115b57-4c5f-4846-826d-f18261dbd60d)
+
 ## Request RLAP dataset  
 
 If you wish to obtain the RLAP dataset, please send an email to kegangwang@mails.ccnu.edu.cn and cc yantaowei@ccnu.edu.cn, with the Data Usage Agreement attached.  
