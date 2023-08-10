@@ -548,7 +548,7 @@ The test data used by PhysBench may not necessarily reflect the accuracy in real
 
 ## Full Benchmark Table  
 All the results of the experiments we conducted can be found here.  
-[FullBench.pdf](https://github.com/fc115b57-4c5f-4846-826d-f18261dbd60d)
+[FullBench.pdf]([https://github.com/fc115b57-4c5f-4846-826d-f18261dbd60d](https://github.com/KegangWangCCNU/PICS/raw/main/FullBench.pdf))
 
 ## Request RLAP dataset  
 
