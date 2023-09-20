@@ -64,7 +64,7 @@ def detrend(signal, Lambda=25):
             rst[i:] = _detrend(signal[-900:])[-(rst.shape[0]-i):]
     return rst
 
-def bandpass_filter(data, lowcut=0.5, highcut=3, fs=30, order=2):
+def bandpass_filter(data, lowcut=0.5, highcut=3, fs=30, order=3):
     b, a = butter(order, [lowcut, highcut], fs=fs, btype='band')
     return lfilter(b, a, data)
 
@@ -421,7 +421,7 @@ def dump_dataset(target, files, loader, labels=None, resolution=(128, 128), thre
                     for k, v in labels[n].items():
                         j.attrs[k] = v
 
-def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), extend_rate=1, step=1, dtype=np.float16, compression=0, shuffle=True, buffer=32, sample=cv2.INTER_CUBIC, selector=lambda s:True, **kw):
+def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ext_only=False, ext_fps=0, extend_rate=1, step=1, dtype=np.float16, compression=0, shuffle=True, buffer=32, sample=cv2.INTER_CUBIC, selector=lambda s:True, **kw):
     """
     shape: (frames, width, height)
     extend_hr: Perform data augmentation by scaling in time to generate more high heart rate and low heart rate samples.
@@ -487,14 +487,17 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
                 frames = all_frames[n:n+shape[0]]
                 if frames.shape[0]<shape[0]:
                     break
-                buffers['vid'].append(frames)
-                buffers['bvp'].append(i['bvp'][n:n+shape[0]])
-                buffers['bvp_normalized'].append(bvp_normalized[n:n+shape[0]])
-                for j in ext_buffers:
-                    ext_buffers[j].append(i[j][n:n+shape[0]])
+                if not ext_only:
+                    buffers['vid'].append(frames)
+                    buffers['bvp'].append(i['bvp'][n:n+shape[0]])
+                    buffers['bvp_normalized'].append(bvp_normalized[n:n+shape[0]])
+                    for j in ext_buffers:
+                        ext_buffers[j].append(i[j][n:n+shape[0]])
                 while extend_rate>0 and np.random.rand()<1/(1+1/extend_rate):
                     hr_target = np.log2(1+np.random.rand())*(extend_hr[1]-extend_hr[0])+extend_hr[0]
-                    frames_target = round(shape[0]*hr_target/hr)
+                    if ext_fps > 0:
+                        hr = ext_fps / sr * hr
+                    frames_target = max(round(shape[0]*hr_target/hr), 4) # Minimum 4 frames
                     if n+frames_target>all_frames.shape[0]:
                         break
                     _1, _2 = resize(all_frames[n:n+frames_target], [i['bvp'][n:n+frames_target], bvp_normalized[n:n+frames_target]]+[i[j][n:n+frames_target] for j in ext_buffers], shape[0])
@@ -628,7 +631,7 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buff
         
     return _()
 
-def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', step=1, save='result.h5', batch=4, cumsum=False, sample=cv2.INTER_AREA, ipt_dtype=np.float16, selector=lambda s:True, **kw):
+def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', fps=None, step=1, save='result.h5', batch=4, cumsum=False, sample=cv2.INTER_AREA, ipt_dtype=np.float16, selector=lambda s:True, **kw):
     def selector_(s):
         for k, v in kw.items():
             if isinstance(v, str):
@@ -636,6 +639,15 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
             if k in s and str(s[k]) not in v:
                 return False
         return selector(s)
+    
+    def resize(frames, waves, length):
+        """
+        Scale frames and waves in time to length frames.
+        """
+        p = frames.reshape(frames.shape[0], -1, frames.shape[-1])
+        p = cv2.resize(p, (p.shape[1], length), interpolation=cv2.INTER_NEAREST).reshape(length, *frames.shape[1:])
+        b = [UnivariateSpline(np.linspace(0, 1, i.shape[0]), i, s=0)(np.linspace(0, 1, length)) for i in waves]
+        return p, b
     
     if not callable(sample):
         sample_h = hash(sample)
@@ -651,9 +663,9 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
         fo.attrs['dataset'] = os.path.abspath(dataset)
         fo.attrs['output'] = output
         for i, j in tqdm(fi.items()):
-            if not selector_(j.attrs):
+            attrs = {**j.attrs}
+            if not selector_(attrs):
                 continue
-            fps = 1/(j['timestamp'][1:]-j['timestamp'][:-1]).mean()
             h = hash((j.attrs['path'], dataset, input_resolution, sample_h))
             try:
                 vid = np.load(f'{tmp}/{h}.npy')
@@ -666,6 +678,14 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
                 if j['video'].shape[2:0:-1] != input_resolution:
                     vid = np.stack([sample(_, input_resolution[::-1]) for _ in vid]).astype(ipt_dtype)
                     np.save(f'{tmp}/{h}.npy', vid)
+                    
+            ofps = 1/(j['timestamp'][1:]-j['timestamp'][:-1]).mean()
+            if not fps:
+                fps = ofps
+            else:
+                vid, (bvp, ts) = resize(vid.astype(np.float32), [j['bvp'][:], j['timestamp'][:]], round(vid.shape[0]*fps/ofps))
+                vid, j = vid.astype(ipt_dtype), {'bvp':bvp, 'timestamp':ts}
+            
             result, ipt = [], []
             for idx in np.arange(0, vid.shape[0]-input_frames+fps*step, fps*step).astype(int):
                 idx = min(idx, vid.shape[0]-input_frames)
@@ -692,8 +712,8 @@ def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP'
                 predict = detrend(np.cumsum(predict))
             label = j['bvp'][:]
             _ = fo.create_group(i)
-            for k in j.attrs:
-                _.attrs[k] = j.attrs[k]
+            for k in attrs:
+                _.attrs[k] = attrs[k]
             if output=='BVP':
                 _.attrs['SNR'] = SNR(label, predict)
             _.create_dataset('predict', data=predict, dtype=np.float32)
