@@ -14,7 +14,7 @@ Then, install the deep learning frameworks according to your needs. If you need 
 Install TensorFlow environment (Windows):
 ```
 conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1
-pip install tensorflow-gpu==2.10 keras==2.10
+pip install tensorflow-gpu==2.6 keras==2.6
 ```
 Install Pytorch environment:
 ```
