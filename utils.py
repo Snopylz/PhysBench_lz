@@ -5,8 +5,8 @@ import time
 import tqdm
 import numpy as np
 import heartpy as hp
-import warnings
-warnings.simplefilter("ignore", UserWarning)
+#import warnings
+#warnings.simplefilter("ignore", UserWarning)
 from scipy.interpolate import UnivariateSpline
 import mediapipe as mp
 import alphashape
@@ -537,14 +537,16 @@ def dump_datatape(dataset, datatape, shape=(32, 32, 32), extend_hr=(40, 150), ex
                 f[j][-k.shape[0]:] = k
         f.create_dataset('index', data=np.random.permutation(f['vid'].shape[0]) if shuffle else np.arange(f['vid'].shape[0]))
 
-def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buffer=32, gnoise=0, batch=0, dtype=np.float32):
+def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buffer=256, gnoise=0, batch=0, dtype=np.float16):
     with h5py.File(path, 'r') as f:
         if shuffle == 0:
             index = np.arange(f['index'].shape[0])
-        elif shuffle == 1:
+        elif shuffle == -1:
             index = f['index'][:]
         else:
-            index = f['index'][:][np.random.permutation(f['index'].shape[0])]
+            index = np.arange(f['index'].shape[0]) 
+            index_ = np.random.permutation(index[:-(index.shape[0]%buffer)].reshape(-1, buffer)).reshape(-1)
+            index[:index_.shape[0]] = index_
         shape = f['vid'].shape[1:]
         if load_ext:
             ext_keys = [i for i in f.keys() if i not in ('index', 'vid', 'bvp', 'bvp_normalized')]
@@ -581,9 +583,9 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buff
                 def _3(i):
                     index_arg = np.argsort(index[i:i+buffer])
                     index_T = np.argsort(index_arg)
-                    vid_, bvp_ = vid[index[i:i+buffer][index_arg]][index_T], bvp[index[i:i+buffer][index_arg]][index_T].astype(dtype)
+                    vid_, bvp_ = vid[index[i:i+buffer][index_arg]][index_T], bvp[index[i:i+buffer][index_arg]][index_T]
                     if load_ext and ext_keys:
-                        ext_ = {k:v[index[i:i+buffer][index_arg]][index_T].astype(dtype) for k, v in ext.items()}
+                        ext_ = {k:v[index[i:i+buffer][index_arg]][index_T] for k, v in ext.items()}
                         return vid_, bvp_, ext_
                     return vid_, bvp_
                 yield from map(_3, np.arange(0, index.shape[0], buffer))
@@ -599,9 +601,9 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buff
             if gnoise>0:
                 vid_ += np.random.normal(size=vid_.shape, scale=gnoise/255).astype(dtype)
             if not load_ext:
-                yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i])), range(min(vid_.shape[0], buffer)))
+                yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i]).astype(dtype)), range(min(vid_.shape[0], buffer)))
             else:
-                yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i]), {k:v[i] for k, v in ext_.items()}), range(min(vid_.shape[0], buffer)))
+                yield from map(lambda i:(vid_[i], (lambda x:(x-x.mean())/(x.std()+1e-6))(bvp_[i]).astype(dtype), {k:v[i] for k, v in ext_.items()}), range(min(vid_.shape[0], buffer)))
     
     def _0(n):
         def f():
@@ -631,7 +633,7 @@ def load_datatape(path, shuffle=0, use_normalized_bvp=True, load_ext=False, buff
         
     return _()
 
-def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', fps=None, step=1, save='result.h5', batch=4, cumsum=False, sample=cv2.INTER_AREA, ipt_dtype=np.float16, selector=lambda s:True, **kw):
+def eval_on_dataset(dataset, model, input_frames, input_resolution, output='BVP', fps=None, step=1, save='result.h5', batch=4, cumsum=False, sample=cv2.INTER_AREA, ipt_dtype=np.float32, selector=lambda s:True, **kw):
     def selector_(s):
         for k, v in kw.items():
             if isinstance(v, str):
@@ -746,6 +748,7 @@ def get_metrics(result='result.h5', window=30, step=10, use_filter=True, selecto
             predict = j['predict'][:]
             if use_filter:
                 predict = bandpass_filter(predict, fs=fps)
+                #label = bandpass_filter(label, fs=fps)
             r_m.append((get_hr(label, sr=fps), predict_hr(predict, sr=fps)))
             for t in np.arange(0, label.shape[0]-(window*fps)//2, step*fps).astype(int):
                 r.append((get_hr(label[t:t+round(window*fps)], sr=fps), predict_hr(predict[t:t+round(window*fps)], sr=fps)))
@@ -773,6 +776,7 @@ def get_metrics_HRV(result='result.h5', use_filter=True, selector=lambda s:True,
                 However, when the noise is large, this is the only choice and whether to use a filter should be decided according to needs.
                 """
                 predict = bandpass_filter(predict, fs=fps)
+                #label = bandpass_filter(label, fs=fps)
             r1, r2 = hp.process(label, fps)[1], hp.process(predict, fps)[1]
             if np.isnan(r1['sdnn']) or np.isnan(r2['sdnn']):
                 continue
