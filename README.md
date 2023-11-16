@@ -11,7 +11,7 @@ conda activate physbench
 pip install -r requirements.txt
 ```
 Then, install the deep learning frameworks according to your needs. If you need to install multiple frameworks, it is recommended to create different environments for them.  
-Install TensorFlow environment (Windows):
+Install TensorFlow environment:
 ```
 conda install -c conda-forge tensorflow-gpu keras
 ```
