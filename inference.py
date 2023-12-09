@@ -1,16 +1,87 @@
 from utils import *
-from models import *
-import argparse
+from models import * 
+from unsupervised_methods import * 
+import argparse 
 parser = argparse.ArgumentParser()
 parser.add_argument("--video", help="Video path")
 parser.add_argument("--out", help="BVP csv file path", default='')
-parser.add_argument("--weights", help="HDF5 path of model weights", default='weights/m1.h5')
+parser.add_argument("--weights", help="HDF5 path of model weights", default='auto') 
+parser.add_argument("--model", help="Supported models: seq, tscan, deepphys, efficientphys, physnet, chrom, pos, ica", default='seq') 
+parser.add_argument("--fps", help="Sample the video to the target fps", default='30')  
+parser.add_argument("--show-wave", help="Display waveform", action='store_true')
 
 args = parser.parse_args()
 
-model = M_1()
-model.build(input_shape=(None, 450, 8, 8, 3))
-model.load_weights(args.weights)
+if args.model == 'seq':
+    resolution = (8, 8) 
+    seq = M_1()
+    seq.build(input_shape=(None, 450, 8, 8, 3)) 
+    if args.weights == 'auto':
+        seq.load_weights('./weights/m1.h5')
+    else:
+        seq.load_weights(args.weights)
+    model = lambda x:seq(np.array([x]))[0] 
+    chunk = 450 
+    cumsum = False
+elif args.model == 'tscan':
+    resolution = (36, 36) 
+    tscan = TS_CAN_end_to_end(n=20) 
+    tscan.build(input_shape=(None, 36, 36, 3))
+    if args.weights == 'auto':
+        tscan.load_weights('./weights/TS-CAN_CCNU.h5')
+    else:
+        tscan.load_weights(args.weights)
+    model = tscan
+    chunk = 160  
+    cumsum = True
+elif args.model == 'deepphys':
+    resolution = (36, 36) 
+    dp = DeepPhys_end_to_end()
+    dp.build(input_shape=(None, 36, 36, 3))
+    if args.weights == 'auto':
+        dp.load_weights('./weights/DeepPhys_CCNU.h5')
+    else:
+        dp.load_weights(args.weights) 
+    model = dp  
+    chunk = None  
+    cumsum = True 
+elif args.model == 'efficientphys':
+    resolution = (72, 72) 
+    ep = EP(n=32)
+    ep.build(input_shape=(None, 72, 72, 3))
+    if args.weights == 'auto':
+        ep.load_weights('./weights/EfficientPhys_CCNU.h5')
+    else:
+        ep.load_weights(args.weights)
+    model = ep  
+    chunk = 32   
+    cumsum = True 
+elif args.model == 'physnet':
+    resolution = (32, 32)  
+    phys_net = PhysNet()
+    phys_net.build(input_shape=(None, 128, 32, 32, 3))
+    if args.weights == 'auto':
+        phys_net.load_weights('./weights/PhysNet_CCNU.h5')  
+    else:
+        phys_net.load_weights(args.weights)
+    model = lambda x:phys_net(np.array([x]))[0]  
+    chunk = None 
+    cumsum = False  
+elif args.model == 'chrom':
+    resolution = (1, 1) 
+    model = lambda x:CHROM(np.mean(x, axis=(-3, -2))) 
+    chunk = None
+    cumsum = False  
+elif args.model == 'pos': 
+    resolution = (1, 1) 
+    model = lambda x:POS(np.mean(x, axis=(-3, -2)), fs=float(args.fps)).reshape(-1)
+    chunk = None
+    cumsum = False  
+elif args.model == 'ica': 
+    resolution = (1, 1) 
+    model = lambda x:ICA(np.mean(x, axis=(-3, -2))) 
+    chunk = None
+    cumsum = False 
 
 def vid(v):
     cap = cv2.VideoCapture(v)
@@ -19,7 +90,11 @@ def vid(v):
         if not _:
             break
         yield cv2.cvtColor(f, cv2.COLOR_BGR2RGB)
-v = args.video
+        
+v = args.video 
+_ = cv2.VideoCapture(v) 
+fps = _.get(cv2.CAP_PROP_FPS)  
+_.release() 
 bvp = []
 f = []
 n = 0
@@ -52,29 +127,50 @@ with mp.solutions.face_mesh.FaceMesh(max_num_faces=1) as fm:
         if box_ is None:
             bvp.append(0)
         else:
-            _ = cv2.resize(frame[slice(*box_[1]), slice(*box_[0])], (8, 8), interpolation=cv2.INTER_AREA)
-            f.append(_)
-f = np.array(f)
-if f.shape[0]<450:
-    exit()
-_ = []
-for i in range(0, len(f)-450, 150):
-    _1 = np.full(f.shape[0], np.nan)
-    _1[i:i+450] = model([f[i:i+450]/255])[0]
-    _.append(_1)
-_1 = np.full(f.shape[0], np.nan)
-_1[-450:] = model([f[-450:]/255])
-_.append(_1)
-predict = np.nanmean(_, axis=0)
-bvp = np.concatenate([bvp, predict])
+            _ = cv2.resize(frame[slice(*box_[1]), slice(*box_[0])], resolution, interpolation=cv2.INTER_AREA)
+            f.append(_) 
+frames = np.array(f)/255
+p = frames.reshape(frames.shape[0], -1, frames.shape[-1])
+length = int(frames.shape[0] * float(args.fps)/fps) 
+frames = cv2.resize(p, (p.shape[1], length)).reshape(length, *frames.shape[1:]) 
+if chunk:
+    n = 0 
+    opts = []
+    while 1:
+        opt = np.full((frames.shape[0],), np.nan)
+        ipt = frames[n:n+chunk]
+        if ipt.shape[0] < chunk:
+            ipt_ = np.concatenate([ipt, [ipt[-1]]*(chunk-ipt.shape[0])], axis=0) 
+            opt[n:] = np.array(model(ipt_)).reshape((-1, ))[:ipt.shape[0]] 
+            opts.append(opt) 
+            break
+        opt[n:n+chunk] = np.array(model(ipt)).reshape((-1, )) 
+        opts.append(opt) 
+        n += chunk // 2
+    predict = np.nanmean(np.array(opts), axis=0)  
+    if cumsum:
+        predict = np.cumsum(predict) 
+else:
+    predict = model(frames) 
 
+predict[np.isnan(predict)] = 0.
+predict = UnivariateSpline(np.linspace(0, 1, predict.shape[0]), predict, s=0)(np.linspace(0, 1, len(f))) 
+predict = bandpass_filter(predict, fs=fps)    
+bvp = np.concatenate([bvp, predict]) 
+bvp = (bvp-bvp.mean())/(bvp.std()+1e-6) 
+bvp = np.clip(bvp, a_max=bvp.std()*3, a_min=-bvp.std()*3)
 out = args.out
 if not out:
     out = v+'.csv'
 
 with open(out, 'w') as f:
-    f.write('BVP\n')
-    for i in bvp:
-        f.write(f'{i}\n')
+    f.write('Timestamp, BVP\n')
+    for i, j in enumerate(bvp):
+        f.write(f'{i/fps},{j}\n')
 
-print('\nBVP signal extraction completed, please use frames_timestamp.csv to synchronize it.')
+print(f'\nHeart Rate: {get_hr(bvp, sr=fps):.2f}')  
+print(f'\nBVP output save path: {out}') 
+
+if args.show_wave:
+    plt.plot(*pd.read_csv(out).values.T) 
+    plt.show() 
