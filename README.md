@@ -22,10 +22,13 @@ conda install pytorch torchvision torchaudio pytorch-cuda -c pytorch -c nvidia
 ## Inference on a single video  
 To extract BVP signals from your own collected video, please execute the following code.  
 ```
-python inference.py --video face.avi --out BVP.csv 
+python inference.py --video input_face.avi --model seq
 ```  
-Its output `BVP.csv` contains the BVP signal values corresponding to each frame.   
-By default, it uses a pre-trained Seq-rPPG model on RLAP using TensorFlow.
+
+Currently supported models include seq, tscan, deepphys, efficientphys, physnet, chrom, pos, ica.  
+Use `--out path_to_bvp.csv` to specify the save path for the output BVP waveform;  
+use `--show-wave` for visualization of the output;  
+use `--weights path_to_weights.h5` to specify weights path (or it will automatically use the weights trained on RLAP).  
 
 ## Models  
 
