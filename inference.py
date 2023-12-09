@@ -168,7 +168,7 @@ with open(out, 'w') as f:
     for i, j in enumerate(bvp):
         f.write(f'{i/fps},{j}\n')
 
-print(f'\nHeart Rate: {get_hr(bvp, sr=fps):.2f}')  
+print(f'\nHeart Rate: {get_hr(bvp, sr=float(args.fps)):.2f}')  
 print(f'\nBVP output save path: {out}') 
 
 if args.show_wave:
