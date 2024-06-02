@@ -4,7 +4,7 @@ tmp = "Z:/rppg/tmp_physbench"
 if not os.path.exists(tmp):
     os.makedirs(tmp)
 
-dataset_ccnu = "D:"
+dataset_ccnu = "/N7T/RLAP"
 dataset_mmpd = "C:/MMPD"
 dataset_pure = "Z:/PURE"
 dataset_ubfc_rppg2 = "C:/UBFC-rPPG/DATASET_2"

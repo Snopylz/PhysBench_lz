@@ -63,9 +63,9 @@ def cache_cohface(f):
 
 if __name__ == '__main__':
     with Pool(cores) as p:
-        #p.map(cache_ccnu, files_ccnu)
+        p.map(cache_ccnu, files_ccnu)
         #p.map(cache_pure, files_pure)
         #p.map(cache_ubfc_rppg2, files_ubfc_rppg2)
         #p.map(cache_scamps, files_scamps)
         #p.map(cache_ubfc_phys, files_ubfc_phys)
-        p.map(cache_cohface, files_cohface)
+        # p.map(cache_cohface, files_cohface)
